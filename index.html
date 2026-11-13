@@ -77,14 +77,22 @@
   .nota { font-size: .82rem; opacity: .75; max-width: 22em; }
 
   /* --- Sfera di cristallo --- */
-  .postazione { position: relative; display: flex; flex-direction: column; align-items: center; --d: min(76vw, 44dvh, 360px); }
+  .postazione { position: relative; display: flex; flex-direction: column; align-items: center; --d: min(90vw, 56dvh, 460px); }
+  .postazione.dopo { --d: min(70vw, 36dvh, 330px); }
   .sfera {
     position: relative; z-index: 2;
     width: var(--d); height: var(--d); border-radius: 50%; overflow: hidden;
     -webkit-mask-image: -webkit-radial-gradient(white, black); isolation: isolate;
     background: #0d0716;
     animation: alone 3.5s ease-in-out infinite;
+    transition: width .9s ease, height .9s ease;
   }
+  #vetro3d { position: absolute; inset: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
+  .sfera.gl { background: transparent; }
+  .sfera.gl #vetro3d { display: block; }
+  .sfera.gl #nebbia { opacity: 0; }
+  .sfera.gl video { opacity: 0; }
+  .sfera.gl .vetro, .sfera.gl .vuota { display: none !important; }
   .sfera video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
   .sfera .vuota {
     position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 18%;
@@ -102,12 +110,20 @@
     box-shadow: inset 0 0 0 2px rgba(255,255,255,.25);
   }
   .base {
-    position: relative; z-index: 1; margin-top: calc(var(--d) * -0.09);
-    width: calc(var(--d) * .62); height: calc(var(--d) * .2);
-    background: linear-gradient(90deg, #3d2410, #c9a24a 30%, #f3dc8f 45%, #a87a2c 65%, #3d2410);
-    clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
-    border-radius: 0 0 8px 8px;
+    position: relative; z-index: 1; margin-top: calc(var(--d) * -0.13);
+    width: calc(var(--d) * .62); height: calc(var(--d) * .24);
+    transition: width .9s ease, height .9s ease, margin .9s ease;
   }
+  .base i { position: absolute; left: 50%; transform: translateX(-50%); display: block; }
+  .base .piede { bottom: 0; width: 100%; height: 28%; border-radius: 50%;
+    background: linear-gradient(90deg, #2e1a0a, #a87a2c 30%, #f3dc8f 45%, #8a6a1f 70%, #2e1a0a);
+    box-shadow: 0 12px 20px rgba(0,0,0,.75); }
+  .base .corpo { bottom: 14%; width: 80%; height: 66%;
+    background: linear-gradient(90deg, #3d2410, #c9a24a 28%, #f6e3a1 42%, #a87a2c 66%, #3d2410);
+    clip-path: polygon(17% 0, 83% 0, 100% 100%, 0 100%); }
+  .base .anello { top: 18%; width: 60%; height: 24%; border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 35%, #fff3c4, #c9a24a 45%, #5a3a14 85%);
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,.5); }
   .conto { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; font-family: var(--titolo); font-size: 6rem; color: #fff; text-shadow: 0 0 24px var(--rosa); pointer-events: none; }
   .flash { position: absolute; inset: 0; z-index: 5; background: #fff; opacity: 0; pointer-events: none; border-radius: 50%; }
   .flash.via { animation: flash .6s ease-out; }
@@ -174,12 +190,13 @@
     <div id="sfera" class="sfera">
       <video id="video" autoplay playsinline muted></video>
       <div class="vuota">?</div>
+      <canvas id="vetro3d"></canvas>
       <canvas id="nebbia"></canvas>
       <div class="vetro"></div>
       <div id="conto" class="conto"></div>
       <div id="flash" class="flash"></div>
     </div>
-    <div class="base"></div>
+    <div class="base"><i class="piede"></i><i class="corpo"></i><i class="anello"></i></div>
     <div id="scintille" class="scintille"></div>
   </div>
   <div id="risposta" class="risposta">
@@ -371,6 +388,8 @@
     ctx.shadowBlur = 0;
 
     raggio = Math.max(24, r.width * 0.1) * scala;
+    nebbiaCambiata = true;
+    avvia3D(r.width);
     // Conta solo le celle dentro il cerchio
     celle = new Uint8Array(GRIGLIA * GRIGLIA); totali = 0; pulite = 0;
     for (let rr = 0; rr < GRIGLIA; rr++) for (let cc = 0; cc < GRIGLIA; cc++) {
@@ -401,6 +420,7 @@
     const passi = Math.max(1, Math.ceil(Math.hypot(p.x - da.x, p.y - da.y) / (raggio / 2)));
     for (let i = 0; i <= passi; i++) segnaCelle(da.x + (p.x - da.x) * i / passi, da.y + (p.y - da.y) * i / passi);
     ultimo = p;
+    nebbiaCambiata = true;
     if (!svanita && pulite / totali >= SOGLIA) rivela();
   }
 
@@ -408,6 +428,123 @@
   canvas.addEventListener("pointerdown", e => { if (svanita) return; canvas.setPointerCapture(e.pointerId); ultimo = null; strofina(punto(e)); });
   canvas.addEventListener("pointermove", e => { if (!svanita && canvas.hasPointerCapture(e.pointerId)) strofina(punto(e)); });
   ["pointerup", "pointercancel"].forEach(t => canvas.addEventListener(t, () => { ultimo = null; }));
+
+  // ---------- Sfera 3D (WebGL, senza librerie) ----------
+  let sfera3D = null, nebbiaCambiata = false, svanitaDa = 0;
+  const SHADER_V = `attribute vec2 pos; varying vec2 vUv;
+    void main() { vUv = vec2(pos.x * .5 + .5, .5 - pos.y * .5); gl_Position = vec4(pos, 0., 1.); }`;
+  const SHADER_F = `precision mediump float;
+    varying vec2 vUv;
+    uniform sampler2D uVid, uFog;
+    uniform vec2 uScala;
+    uniform float uFogA, uT, uPix;
+    vec3 vid(vec2 q) {
+      vec2 t = q * .5 + .5; t.x = 1. - t.x;            // effetto specchio
+      t = (t - .5) * uScala + .5;                       // ritaglio quadrato centrato
+      return texture2D(uVid, clamp(t, 0., 1.)).rgb;
+    }
+    void main() {
+      vec2 p = vUv * 2. - 1.;
+      float r2 = dot(p, p), r = sqrt(r2);
+      if (r > 1.) { gl_FragColor = vec4(0.); return; }
+      float z = sqrt(max(1. - r2, 0.));
+      vec3 n = vec3(p.x, -p.y, z);
+      // rifrazione: ingrandisce al centro, comprime ai bordi, con un filo di aberrazione cromatica
+      float k = .6 + .45 * r2;
+      vec2 q = p * k + vec2(sin(uT * .7), cos(uT * .5)) * .006;
+      vec3 col = vec3(vid(q * 1.012).r, vid(q).g, vid(q * .988).b);
+      col = mix(col, vec3(.28, .16, .42), smoothstep(.55, 1., r) * .5);  // spessore del vetro
+      vec4 f = texture2D(uFog, vUv);
+      col = mix(col, f.rgb, f.a * uFogA);                                   // nebbia da strofinare
+      vec3 L = normalize(vec3(-.55, .62, .6));
+      col *= .78 + .3 * max(dot(n, L), 0.);
+      vec2 cau = p - vec2(.32, .52);                                        // luce concentrata in basso
+      col += vec3(1., .82, .95) * .32 * exp(-dot(cau, cau) * 10.);
+      float fres = pow(1. - z, 2.4);
+      vec3 bordo = mix(vec3(1., .35, .8), vec3(.3, .85, 1.), smoothstep(-.9, .9, p.x + sin(uT * .6) * .5));
+      col = mix(col, bordo, fres * .55);
+      vec3 Rf = reflect(vec3(0., 0., -1.), n);
+      float sp = max(dot(Rf, L), 0.);
+      col += pow(sp, 28.) * .55 + pow(sp, 420.) * 1.1;                      // riflessi
+      vec2 fin = (p - vec2(-.38, -.52)) / vec2(.15, .085);                  // finestra riflessa
+      col += .22 * smoothstep(1., .6, max(abs(fin.x), abs(fin.y))) * (1. - .5 * r);
+      float alto = max(dot(p / max(r, 1e-4), normalize(vec2(-.6, -.8))), 0.);
+      col += .35 * smoothstep(.86, .98, r) * alto * alto;                   // filo di luce sul bordo
+      float basso = max(dot(p / max(r, 1e-4), normalize(vec2(.25, .97))), 0.);
+      col *= 1. - .4 * smoothstep(.72, 1., r) * basso;                      // ombra in basso
+      float a = 1. - smoothstep(1. - uPix * 1.5, 1., r);
+      gl_FragColor = vec4(col * a, a);
+    }`;
+
+  function avvia3D(latoCss) {
+    if (sfera3D) return;
+    try {
+      const cv = $("vetro3d");
+      const lato = Math.round(latoCss * Math.min(window.devicePixelRatio || 1, 2));
+      cv.width = cv.height = lato;
+      const gl = cv.getContext("webgl", { alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: true });
+      if (!gl) return;
+      const sh = (tipo, src) => { const o = gl.createShader(tipo); gl.shaderSource(o, src); gl.compileShader(o);
+        if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+      const prog = gl.createProgram();
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, SHADER_V)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, SHADER_F));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+      const aPos = gl.getAttribLocation(prog, "pos");
+      gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+      const u = n => gl.getUniformLocation(prog, n);
+      const tex = unita => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unita); gl.bindTexture(gl.TEXTURE_2D, t);
+        [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(w => gl.texParameteri(gl.TEXTURE_2D, w, gl.CLAMP_TO_EDGE));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([13, 7, 22, 255])); return t; };
+      const tVid = tex(0), tFog = tex(1);
+      gl.uniform1i(u("uVid"), 0); gl.uniform1i(u("uFog"), 1);
+      gl.uniform1f(u("uPix"), 2 / lato);
+
+      // Immagine di riserva quando non c'è la fotocamera
+      const vuota = document.createElement("canvas"); vuota.width = vuota.height = 256;
+      const vc = vuota.getContext("2d");
+      const vg = vc.createRadialGradient(128, 115, 0, 128, 128, 180); vg.addColorStop(0, "#4a2f6a"); vg.addColorStop(1, "#0d0716");
+      vc.fillStyle = vg; vc.fillRect(0, 0, 256, 256);
+      vc.fillStyle = "rgba(230,220,255,.4)"; vc.font = '120px "Luckiest Guy", sans-serif'; vc.textAlign = "center"; vc.textBaseline = "middle";
+      vc.save(); vc.translate(128, 136); vc.scale(-1, 1); vc.fillText("?", 0, 0); vc.restore();
+      let vuotaCaricata = false;
+
+      const disegna = t => {
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tVid);
+        let w = 1, h = 1;
+        if (!senzaCamera && video.readyState >= 2 && video.videoWidth) {
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+          w = video.videoWidth; h = video.videoHeight;
+        } else if (senzaCamera && !vuotaCaricata) {
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, vuota); vuotaCaricata = true;
+        }
+        gl.uniform2f(u("uScala"), w > h ? h / w : 1, h > w ? w / h : 1);
+        if (nebbiaCambiata) {
+          gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tFog);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+          nebbiaCambiata = false;
+        }
+        gl.uniform1f(u("uFogA"), svanitaDa ? Math.max(0, 1 - (t - svanitaDa) / 1400) : 1);
+        gl.uniform1f(u("uT"), t / 1000);
+        gl.viewport(0, 0, lato, lato);
+        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      };
+      disegna(performance.now());
+      if (gl.getError() !== gl.NO_ERROR) return;
+      sfera3D = { canvas: cv, disegna };
+      $("sfera").classList.add("gl");
+      const giro = t => { disegna(t); requestAnimationFrame(giro); };
+      requestAnimationFrame(giro);
+    } catch (e) {
+      console.warn("Sfera 3D non disponibile, uso quella semplice:", e);
+      sfera3D = null;
+    }
+  }
 
   // ---------- Lettere ritagliate ----------
   const CARTE = [["#f2c230", "#1d1d1d"], ["#d8352a", "#f6ecd6"], ["#2f5fa8", "#f6ecd6"], ["#f1e4c8", "#c22f26"],
@@ -470,6 +607,8 @@
   async function rivela() {
     svanita = true;
     canvas.classList.add("svanita");
+    svanitaDa = performance.now();
+    setTimeout(() => document.querySelector(".postazione").classList.add("dopo"), 1500);
     if (navigator.vibrate) navigator.vibrate([40, 60, 90]);
     scintille();
 
@@ -483,13 +622,7 @@
     mostraParola("SEI TU");
     await attesa(6 * 220 + 500);
     box.insertAdjacentHTML("beforeend", `<div class="sottotitolo">LA COSA PIÙ IMPORTANTE DI STASERA</div>
-      <div class="motto">${MOTTO}</div>
-      <button id="btnGruppo" class="link" style="padding:2px 8px">Siete in più? 👥</button>`);
-    $("btnGruppo").addEventListener("click", () => {
-      const gruppo = parola === "SEI TU";
-      mostraParola(gruppo ? "SIETE VOI" : "SEI TU");
-      $("btnGruppo").textContent = gruppo ? "Sei da solo? 👤" : "Siete in più? 👥";
-    });
+      <div class="motto">${MOTTO}</div>`);
 
     if (senzaCamera) {
       box.insertAdjacentHTML("beforeend", '<button id="btnRicarica" class="link" style="margin-top:4px">Riprova con la fotocamera</button>');
@@ -555,6 +688,26 @@
     c.fillStyle = "#f4e9d0"; c.fillText(testo, x, y);
   }
 
+  function basamento(c, cx, y, w) {
+    const h = w * .36;
+    const oro = (x0, x1) => {
+      const g = c.createLinearGradient(x0, 0, x1, 0);
+      g.addColorStop(0, "#2e1a0a"); g.addColorStop(.3, "#c9a24a"); g.addColorStop(.43, "#f6e3a1"); g.addColorStop(.68, "#a87a2c"); g.addColorStop(1, "#2e1a0a");
+      return g;
+    };
+    c.save(); c.translate(cx, y + h * .95); c.scale(1, .16);
+    const om = c.createRadialGradient(0, 0, 0, 0, 0, w * .7);
+    om.addColorStop(0, "rgba(0,0,0,.75)"); om.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = om; c.beginPath(); c.arc(0, 0, w * .7, 0, Math.PI * 2); c.fill(); c.restore();
+    c.fillStyle = oro(cx - w * .5, cx + w * .5);
+    c.beginPath(); c.ellipse(cx, y + h * .82, w * .5, h * .14, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = oro(cx - w * .4, cx + w * .4);
+    c.beginPath(); c.moveTo(cx - w * .27, y + h * .14); c.lineTo(cx + w * .27, y + h * .14); c.lineTo(cx + w * .4, y + h * .8); c.lineTo(cx - w * .4, y + h * .8); c.closePath(); c.fill();
+    const an = c.createRadialGradient(cx, y + h * .08, 0, cx, y + h * .14, w * .32);
+    an.addColorStop(0, "#fff3c4"); an.addColorStop(.45, "#c9a24a"); an.addColorStop(.9, "#5a3a14");
+    c.fillStyle = an; c.beginPath(); c.ellipse(cx, y + h * .14, w * .3, h * .12, 0, 0, Math.PI * 2); c.fill();
+  }
+
   function nuvola(c, x, y, r, col, a) {
     const g = c.createRadialGradient(x, y, 0, x, y, r);
     g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`);
@@ -591,19 +744,18 @@
     titolo3D(c, TITOLO, W / 2, 365, tpx);
 
     // Sfera
-    const cx = W / 2, cy = 790, R = 360;
-    c.save();
-    const bg = c.createLinearGradient(cx - R * .66, 0, cx + R * .66, 0);
-    bg.addColorStop(0, "#3d2410"); bg.addColorStop(.3, "#c9a24a"); bg.addColorStop(.45, "#f3dc8f"); bg.addColorStop(.65, "#a87a2c"); bg.addColorStop(1, "#3d2410");
-    c.fillStyle = bg;
-    c.beginPath(); c.moveTo(cx - R * .52, cy + R * .8); c.lineTo(cx + R * .52, cy + R * .8); c.lineTo(cx + R * .66, cy + R * 1.14); c.lineTo(cx - R * .66, cy + R * 1.14); c.closePath(); c.fill();
-    c.restore();
+    const cx = W / 2, cy = 780, R = 360;
+    basamento(c, cx, cy + R * .74, R * 1.3);
 
     c.save(); c.globalCompositeOperation = "screen";
     nuvola(c, cx - 60, cy, R * 1.55, "255,90,200", .55);
     nuvola(c, cx + 60, cy, R * 1.55, "79,216,255", .45);
     c.restore();
 
+    if (sfera3D) {
+      sfera3D.disegna(performance.now());
+      c.drawImage(sfera3D.canvas, cx - R, cy - R, R * 2, R * 2);
+    } else {
     c.save();
     c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.clip();
     c.fillStyle = "#0d0716"; c.fillRect(cx - R, cy - R, R * 2, R * 2);
@@ -621,6 +773,7 @@
     c.restore();
     c.lineWidth = 4; c.strokeStyle = "rgba(255,255,255,.4)";
     c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+    }
 
     // Risposta
     c.fillStyle = "#f4e9d0"; c.font = '38px "Special Elite", monospace'; c.textAlign = "center";
