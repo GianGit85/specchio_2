@@ -1,25 +1,456 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorpresa ✨</title>
-    <style>
-        body { margin: 0; background: black; color: white; font-family: sans-serif; 
-               display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        video { width: 90%; border-radius: 20px; transform: scaleX(-1); border: 3px solid #fff; }
-        h1 { margin-top: 20px; font-size: 1.8rem; text-align: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Come fecero i Greci ✨</title>
+<style>
+  :root {
+    --oro: #d4af37;
+    --oro-chiaro: #f3dc8f;
+    --oro-scuro: #8a6a1f;
+    --serif: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;
+    --meandro: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M0 11H10M0 1H10M2 11V3H8V9H4.5V5.5H6' fill='none' stroke='%23d4af37' stroke-width='1'/%3E%3C/svg%3E");
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; }
+  body {
+    font-family: var(--serif);
+    overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+    background: radial-gradient(ellipse at 50% 30%, #1b1610 0%, #000 70%);
+  }
+  .meandro { height: 22px; width: 100%; background: var(--meandro) repeat-x center / auto 100%; opacity: .85; flex-shrink: 0; }
+
+  .schermata {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: max(14px, env(safe-area-inset-top)) 18px max(14px, env(safe-area-inset-bottom));
+    opacity: 0; pointer-events: none; transition: opacity .8s ease;
+  }
+  .schermata.attiva { opacity: 1; pointer-events: auto; }
+  .centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; gap: 18px; }
+
+  .presenta { font-size: .8rem; letter-spacing: .35em; color: var(--oro); opacity: 0; animation: appari 1.2s .3s forwards; }
+  .titolo {
+    font-size: clamp(1.9rem, 9vw, 3rem); letter-spacing: .08em; line-height: 1.1; margin: 0;
+    background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 55%, var(--oro-scuro));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    opacity: 0; animation: appari 1.4s .9s forwards;
+  }
+  .data { font-size: .95rem; letter-spacing: .3em; opacity: 0; animation: appari 1.2s 1.5s forwards; }
+  .domanda { min-height: 4.6em; font-size: clamp(1.15rem, 5.4vw, 1.5rem); line-height: 1.45; max-width: 22em; font-style: italic; }
+  .cursore { display: inline-block; width: .5em; animation: lampeggia 1s steps(1) infinite; color: var(--oro); }
+
+  .bottone {
+    font-family: var(--serif); font-size: 1.05rem; letter-spacing: .2em; text-transform: uppercase;
+    color: #000; background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 60%, var(--oro-scuro));
+    border: none; border-radius: 999px; padding: 16px 34px; cursor: pointer;
+    box-shadow: 0 0 24px rgba(212,175,55,.35);
+    transition: transform .15s ease, opacity .6s ease;
+  }
+  .bottone:active { transform: scale(.96); }
+  .bottone.secondario { background: transparent; color: var(--oro); border: 1px solid var(--oro); box-shadow: none; }
+  .nascosto { opacity: 0 !important; pointer-events: none !important; }
+  .link { background: none; border: none; color: #aaa; font-family: var(--serif); font-size: .85rem; text-decoration: underline; cursor: pointer; padding: 8px; }
+
+  /* --- Gratta --- */
+  .intestazione { font-size: .8rem; letter-spacing: .3em; color: var(--oro); text-align: center; }
+  .cornice {
+    position: relative;
+    width: min(84vw, 50dvh, 400px); aspect-ratio: 3 / 4;
+    border-radius: 18px; overflow: hidden;
+    border: 2px solid var(--oro);
+    box-shadow: 0 0 0 6px #000, 0 0 0 7px rgba(212,175,55,.5), 0 0 40px rgba(212,175,55,.25);
+    background: #111;
+  }
+  .cornice video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .cornice.senza-camera { background: radial-gradient(ellipse at 40% 30%, #3a3a3a, #050505 70%); }
+  .cornice.senza-camera::after {
+    content: "Guarda lo schermo:\A ti ci vedi riflesso."; white-space: pre; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; text-align: center; color: #ddd; font-style: italic; font-size: 1.1rem; line-height: 1.6;
+  }
+  #gratta { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; transition: opacity 1.2s ease; }
+  #gratta.sciolto { opacity: 0; pointer-events: none; }
+  .scintille { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .scintilla {
+    position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle, #fff, var(--oro-chiaro) 40%, transparent 70%);
+    animation: esplodi 1.6s ease-out forwards;
+  }
+  .conto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; color: #fff; text-shadow: 0 0 20px #000; pointer-events: none; }
+  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .flash.via { animation: flash .6s ease-out; }
+
+  .risposta { min-height: 7.5em; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; text-align: center; }
+  .suggerimento { font-style: italic; color: #ccc; font-size: 1.05rem; animation: respira 2.2s ease-in-out infinite; }
+  .sei-tu {
+    font-size: clamp(2.6rem, 13vw, 3.6rem); letter-spacing: .12em; margin: 0;
+    background: linear-gradient(180deg, #fff, var(--oro-chiaro) 40%, var(--oro));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: sorgi 1.4s ease forwards;
+  }
+  .gnothi { font-size: .8rem; letter-spacing: .25em; color: var(--oro); opacity: 0; animation: appari 1.5s 1s forwards; }
+  .gnothi small { display: block; color: #999; letter-spacing: .15em; margin-top: 4px; font-style: italic; }
+
+  /* --- Foto --- */
+  #anteprima { width: min(80vw, 55dvh * 0.8, 380px); border: 1px solid rgba(212,175,55,.5); border-radius: 6px; box-shadow: 0 0 40px rgba(212,175,55,.2); -webkit-touch-callout: default; user-select: auto; }
+  .riga-bottoni { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .nota { font-size: .78rem; color: #888; font-style: italic; max-width: 22em; text-align: center; }
+
+  /* --- Errore --- */
+  .errore { max-width: 24em; line-height: 1.55; font-size: 1rem; }
+  .errore h2 { color: var(--oro); letter-spacing: .1em; font-weight: normal; }
+  .errore ol { text-align: left; padding-left: 1.2em; }
+
+  @keyframes appari { to { opacity: 1; } }
+  @keyframes lampeggia { 50% { opacity: 0; } }
+  @keyframes respira { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  @keyframes sorgi { from { opacity: 0; transform: translateY(14px) scale(.96); letter-spacing: .4em; } to { opacity: 1; transform: none; letter-spacing: .12em; } }
+  @keyframes esplodi { 0% { transform: translate(-50%,-50%) scale(.4); opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s)); opacity: 0; } }
+  @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+</style>
 </head>
 <body>
-    <video id="webcam" autoplay playsinline></video>
-    <h1>Sei proprio tu!</h1>
 
-    <script>
-        const video = document.getElementById('webcam');
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-            .then(stream => { video.srcObject = stream; })
-            .catch(err => { alert("Per favore, ricarica la pagina e consenti l'accesso alla fotocamera!"); });
-    </script>
+<!-- 1. INTRO -->
+<section id="intro" class="schermata attiva">
+  <div class="meandro"></div>
+  <div class="centro">
+    <div class="presenta">COPIA INCOLLA APS PRESENTA</div>
+    <h1 class="titolo">COME FECERO<br>I GRECI</h1>
+    <div class="data">20 NOVEMBRE</div>
+    <p class="domanda"><span id="testoDomanda"></span><span class="cursore">|</span></p>
+    <button id="btnInizia" class="bottone nascosto">Scoprilo</button>
+    <p id="notaCamera" class="nota nascosto">Ti chiederemo di usare la fotocamera.</p>
+  </div>
+  <div class="meandro"></div>
+</section>
+
+<!-- 2. GRATTA -->
+<section id="scena" class="schermata">
+  <div class="intestazione">COME FECERO I GRECI</div>
+  <div class="centro">
+    <div id="cornice" class="cornice">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="gratta"></canvas>
+      <div id="scintille" class="scintille"></div>
+      <div id="conto" class="conto"></div>
+      <div id="flash" class="flash"></div>
+    </div>
+    <div id="risposta" class="risposta">
+      <div id="suggerimento" class="suggerimento">Gratta per scoprirlo…</div>
+    </div>
+  </div>
+  <div class="meandro"></div>
+</section>
+
+<!-- 3. FOTO -->
+<section id="foto" class="schermata">
+  <div class="intestazione">LA TUA FOTO</div>
+  <div class="centro">
+    <img id="anteprima" alt="La tua foto ricordo">
+    <div class="riga-bottoni">
+      <button id="btnCondividi" class="bottone">Condividi</button>
+      <button id="btnRifai" class="bottone secondario">Rifai</button>
+    </div>
+    <p id="notaSalva" class="nota">Se non si apre la condivisione, tieni premuto sulla foto per salvarla.</p>
+  </div>
+  <div class="meandro"></div>
+</section>
+
+<!-- 4. ERRORE FOTOCAMERA -->
+<section id="errore" class="schermata">
+  <div class="meandro"></div>
+  <div class="centro">
+    <div class="errore" id="testoErrore"></div>
+    <button id="btnRiprova" class="bottone">Riprova</button>
+    <button id="btnSenza" class="link">Continua senza fotocamera</button>
+  </div>
+  <div class="meandro"></div>
+</section>
+
+<script>
+(() => {
+  const TITOLO = "COME FECERO I GRECI";
+  const DATA = "20 NOVEMBRE";
+  const COMPAGNIA = "COPIA INCOLLA APS";
+  const DOMANDA = "Sai qual è la cosa più importante di questo spettacolo?";
+  const SOGLIA = 0.55; // quota grattata oltre la quale la patina si scioglie
+
+  const $ = id => document.getElementById(id);
+  const video = $("video");
+  let stream = null;
+  let senzaCamera = false;
+  let fileFoto = null;
+
+  function mostra(id) {
+    document.querySelectorAll(".schermata").forEach(s => s.classList.toggle("attiva", s.id === id));
+  }
+
+  // ---------- 1. Intro: domanda scritta a macchina ----------
+  function scriviDomanda() {
+    const el = $("testoDomanda");
+    let i = 0;
+    const passo = () => {
+      el.textContent = DOMANDA.slice(0, ++i);
+      if (i < DOMANDA.length) setTimeout(passo, DOMANDA[i - 1] === " " ? 70 : 45);
+      else { $("btnInizia").classList.remove("nascosto"); $("notaCamera").classList.remove("nascosto"); }
+    };
+    setTimeout(passo, 2300);
+  }
+  scriviDomanda();
+
+  // ---------- Fotocamera ----------
+  async function avviaCamera() {
+    const btn = $("btnInizia");
+    btn.textContent = "Un attimo…"; btn.disabled = true;
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw { name: "NonSupportato" };
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false
+      });
+      video.srcObject = stream;
+      await video.play().catch(() => {});
+      // Aspetta che il video mostri davvero immagini, non solo il permesso
+      await new Promise((ok) => {
+        if (video.videoWidth > 0) return ok();
+        video.addEventListener("loadeddata", ok, { once: true });
+        setTimeout(ok, 3000);
+      });
+      senzaCamera = false;
+      apriScena();
+    } catch (e) {
+      mostraErrore(e);
+    } finally {
+      btn.textContent = "Scoprilo"; btn.disabled = false;
+    }
+  }
+
+  function mostraErrore(e) {
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    let html;
+    if (e && e.name === "NonSupportato") {
+      html = `<h2>Fotocamera non disponibile</h2>
+        <p>Questo browser non permette di usare la fotocamera. Probabilmente il link si è aperto dentro un'altra app.</p>
+        <p>Apri la pagina in <b>${ios ? "Safari" : "Chrome"}</b> e riprova.</p>`;
+    } else if (e && (e.name === "NotFoundError" || e.name === "OverconstrainedError")) {
+      html = `<h2>Nessuna fotocamera trovata</h2><p>Non riusciamo a trovare una fotocamera su questo dispositivo.</p>`;
+    } else if (e && e.name === "NotReadableError") {
+      html = `<h2>Fotocamera occupata</h2><p>Un'altra app sta usando la fotocamera. Chiudila e tocca <b>Riprova</b>.</p>`;
+    } else {
+      html = `<h2>Ci serve la fotocamera</h2>
+        <p>Senza fotocamera non puoi vedere la risposta. Per riattivarla:</p>` +
+        (ios
+          ? `<ol><li>Tocca <b>aA</b> nella barra dell'indirizzo</li><li>Scegli <b>Impostazioni sito web</b></li><li>Imposta <b>Fotocamera</b> su <b>Consenti</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`
+          : `<ol><li>Tocca il <b>lucchetto</b> accanto all'indirizzo</li><li>Apri <b>Autorizzazioni</b></li><li>Attiva la <b>Fotocamera</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`);
+    }
+    $("testoErrore").innerHTML = html;
+    mostra("errore");
+  }
+
+  $("btnInizia").addEventListener("click", avviaCamera);
+  $("btnRiprova").addEventListener("click", () => { mostra("intro"); avviaCamera(); });
+  $("btnSenza").addEventListener("click", () => { senzaCamera = true; $("cornice").classList.add("senza-camera"); apriScena(); });
+
+  // ---------- 2. Gratta e scopri ----------
+  const canvas = $("gratta");
+  const ctx = canvas.getContext("2d");
+  const GRIGLIA = 24;
+  let celle, pulite, raggio, scala, ultimo = null, sciolto = false, pronto = false;
+
+  function apriScena() {
+    mostra("scena");
+    if (!pronto) requestAnimationFrame(() => { preparaPatina(); pronto = true; });
+  }
+
+  function preparaPatina() {
+    const r = canvas.getBoundingClientRect();
+    scala = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(r.width * scala);
+    canvas.height = Math.round(r.height * scala);
+    const w = canvas.width, h = canvas.height;
+
+    // Oro spazzolato
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#7d5e1a"); g.addColorStop(.22, "#e9cc7a"); g.addColorStop(.45, "#a8802c");
+    g.addColorStop(.62, "#f6e3a1"); g.addColorStop(.82, "#b38a33"); g.addColorStop(1, "#6e5216");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < w * h / 60; i++) {
+      ctx.fillStyle = Math.random() < .5 ? "rgba(255,255,230,.18)" : "rgba(60,40,0,.15)";
+      ctx.fillRect(Math.random() * w, Math.random() * h, scala, scala * (1 + Math.random() * 3));
+    }
+    // Meandri in alto e in basso
+    ctx.strokeStyle = "rgba(70,48,5,.55)"; ctx.lineWidth = 2 * scala;
+    disegnaMeandro(ctx, 0, 14 * scala, w, 16 * scala);
+    disegnaMeandro(ctx, 0, h - 30 * scala, w, 16 * scala);
+    // Scritta incisa
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `${30 * scala}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillStyle = "rgba(255,245,210,.55)"; ctx.fillText("GRATTA QUI", w / 2 + scala, h / 2 + scala);
+    ctx.fillStyle = "rgba(70,48,5,.8)"; ctx.fillText("GRATTA QUI", w / 2, h / 2);
+    ctx.font = `${44 * scala}px sans-serif`;
+    ctx.fillText("☝︎", w / 2, h / 2 + 56 * scala);
+
+    raggio = Math.max(26, r.width * 0.09) * scala;
+    celle = new Uint8Array(GRIGLIA * GRIGLIA); pulite = 0;
+  }
+
+  function disegnaMeandro(c, x0, y, larghezza, u) {
+    // u = altezza della fascia; ogni modulo è largo quanto alto
+    c.beginPath();
+    c.moveTo(x0, y + u); c.lineTo(x0 + larghezza, y + u);
+    c.moveTo(x0, y); c.lineTo(x0 + larghezza, y);
+    for (let x = x0; x < x0 + larghezza; x += u) {
+      const k = u / 10;
+      c.moveTo(x + 2 * k, y + u); c.lineTo(x + 2 * k, y + 3 * k); c.lineTo(x + 8 * k, y + 3 * k);
+      c.lineTo(x + 8 * k, y + 8 * k); c.lineTo(x + 4.5 * k, y + 8 * k); c.lineTo(x + 4.5 * k, y + 5.5 * k); c.lineTo(x + 6 * k, y + 5.5 * k);
+    }
+    c.stroke();
+  }
+
+  function puntoDa(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * scala, y: (e.clientY - r.top) * scala };
+  }
+
+  function segnaCelle(x, y) {
+    const cw = canvas.width / GRIGLIA, ch = canvas.height / GRIGLIA;
+    const c0 = Math.max(0, Math.floor((x - raggio) / cw)), c1 = Math.min(GRIGLIA - 1, Math.floor((x + raggio) / cw));
+    const r0 = Math.max(0, Math.floor((y - raggio) / ch)), r1 = Math.min(GRIGLIA - 1, Math.floor((y + raggio) / ch));
+    for (let rr = r0; rr <= r1; rr++) for (let cc = c0; cc <= c1; cc++) {
+      const idx = rr * GRIGLIA + cc;
+      if (celle[idx]) continue;
+      const cx = (cc + .5) * cw, cy = (rr + .5) * ch;
+      if ((cx - x) ** 2 + (cy - y) ** 2 <= raggio * raggio) { celle[idx] = 1; pulite++; }
+    }
+  }
+
+  function gratta(p) {
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = raggio * 2;
+    ctx.beginPath();
+    const da = ultimo || p;
+    ctx.moveTo(da.x, da.y); ctx.lineTo(p.x + .01, p.y);
+    ctx.stroke();
+    ctx.globalCompositeOperation = "source-over";
+    const dist = Math.hypot(p.x - da.x, p.y - da.y), passi = Math.max(1, Math.ceil(dist / (raggio / 2)));
+    for (let i = 0; i <= passi; i++) segnaCelle(da.x + (p.x - da.x) * i / passi, da.y + (p.y - da.y) * i / passi);
+    ultimo = p;
+    if (!sciolto && pulite / celle.length >= SOGLIA) rivela();
+  }
+
+  canvas.addEventListener("pointerdown", e => { if (sciolto) return; canvas.setPointerCapture(e.pointerId); ultimo = null; gratta(puntoDa(e)); });
+  canvas.addEventListener("pointermove", e => { if (sciolto || !canvas.hasPointerCapture(e.pointerId)) return; gratta(puntoDa(e)); });
+  ["pointerup", "pointercancel"].forEach(t => canvas.addEventListener(t, () => { ultimo = null; }));
+
+  function rivela() {
+    sciolto = true;
+    canvas.classList.add("sciolto");
+    if (navigator.vibrate) navigator.vibrate([40, 60, 80]);
+    const box = $("scintille");
+    for (let i = 0; i < 46; i++) {
+      const s = document.createElement("span");
+      s.className = "scintilla";
+      const ang = Math.random() * Math.PI * 2, d = 90 + Math.random() * 180;
+      s.style.setProperty("--dx", `${Math.cos(ang) * d}px`);
+      s.style.setProperty("--dy", `${Math.sin(ang) * d}px`);
+      s.style.setProperty("--s", (0.6 + Math.random() * 1.8).toFixed(2));
+      s.style.animationDelay = `${Math.random() * .35}s`;
+      box.appendChild(s);
+    }
+    setTimeout(() => box.innerHTML = "", 2500);
+
+    $("risposta").innerHTML = `
+      <h2 class="sei-tu">SEI TU.</h2>
+      <div class="gnothi">ΓΝΩΘΙ ΣΕΑΥΤΟΝ<small>conosci te stesso</small></div>
+      ${senzaCamera ? "" : '<button id="btnScatta" class="bottone nascosto" style="margin-top:8px">📸 Scatta la foto</button>'}`;
+    if (!senzaCamera) {
+      const b = $("btnScatta");
+      setTimeout(() => b.classList.remove("nascosto"), 2200);
+      b.addEventListener("click", scatta);
+    }
+  }
+
+  // ---------- 3. Foto ricordo ----------
+  async function scatta() {
+    const b = $("btnScatta"); b.disabled = true;
+    const conto = $("conto");
+    for (const n of ["3", "2", "1"]) { conto.textContent = n; await attesa(750); }
+    conto.textContent = "";
+    const fl = $("flash"); fl.classList.remove("via"); void fl.offsetWidth; fl.classList.add("via");
+
+    const tela = componiFoto();
+    const blob = await new Promise(ok => tela.toBlob(ok, "image/jpeg", 0.9));
+    fileFoto = new File([blob], "come-fecero-i-greci.jpg", { type: "image/jpeg" });
+    $("anteprima").src = URL.createObjectURL(blob);
+
+    const puoCondividere = !!(navigator.canShare && navigator.canShare({ files: [fileFoto] }));
+    $("btnCondividi").textContent = puoCondividere ? "Condividi" : "Salva";
+    b.disabled = false;
+    setTimeout(() => mostra("foto"), 350);
+  }
+
+  function componiFoto() {
+    const W = 1080, H = 1350;
+    const t = document.createElement("canvas"); t.width = W; t.height = H;
+    const c = t.getContext("2d");
+    const font = getComputedStyle(document.body).fontFamily;
+
+    const sf = c.createRadialGradient(W / 2, H * .35, 50, W / 2, H * .4, H * .8);
+    sf.addColorStop(0, "#1e1810"); sf.addColorStop(1, "#000");
+    c.fillStyle = sf; c.fillRect(0, 0, W, H);
+
+    c.strokeStyle = "#d4af37"; c.lineWidth = 3;
+    disegnaMeandro(c, 0, 34, W, 36);
+    disegnaMeandro(c, 0, H - 70, W, 36);
+
+    const testo = (s, y, px, colore, spaz) => {
+      c.font = `${px}px ${font}`; c.fillStyle = colore; c.textAlign = "center"; c.textBaseline = "alphabetic";
+      if ("letterSpacing" in c) c.letterSpacing = `${spaz}px`;
+      c.fillText(s, W / 2 + (("letterSpacing" in c) ? spaz / 2 : 0), y);
+    };
+
+    testo("LA COSA PIÙ IMPORTANTE DI STASERA", 140, 38, "#d4af37", 4);
+
+    // Foto ritagliata e specchiata
+    const fx = 110, fy = 175, fw = 860, fh = 830;
+    const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+    const sc = Math.max(fw / vw, fh / vh), sw = fw / sc, sh = fh / sc;
+    c.save();
+    c.beginPath(); c.rect(fx, fy, fw, fh); c.clip();
+    c.translate(fx + fw, fy); c.scale(-1, 1);
+    c.drawImage(video, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, fw, fh);
+    c.restore();
+    c.lineWidth = 6; c.strokeRect(fx - 3, fy - 3, fw + 6, fh + 6);
+    c.lineWidth = 1.5; c.strokeRect(fx - 16, fy - 16, fw + 32, fh + 32);
+
+    const oro = c.createLinearGradient(0, 1040, 0, 1130);
+    oro.addColorStop(0, "#fff8dc"); oro.addColorStop(.5, "#f3dc8f"); oro.addColorStop(1, "#c9a032");
+    testo("SEI TU", 1128, 104, oro, 14);
+    testo(TITOLO, 1200, 46, "#ffffff", 5);
+    testo(`${DATA}  ·  ${COMPAGNIA}`, 1250, 28, "#d4af37", 4);
+    return t;
+  }
+
+  $("btnCondividi").addEventListener("click", async () => {
+    if (!fileFoto) return;
+    if (navigator.canShare && navigator.canShare({ files: [fileFoto] })) {
+      try {
+        await navigator.share({ files: [fileFoto], title: TITOLO, text: `La cosa più importante di stasera? Io. ✨ ${TITOLO} – ${DATA}` });
+        return;
+      } catch (e) { if (e.name === "AbortError") return; }
+    }
+    const a = document.createElement("a");
+    a.href = $("anteprima").src; a.download = fileFoto.name;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  $("btnRifai").addEventListener("click", () => mostra("scena"));
+
+  const attesa = ms => new Promise(ok => setTimeout(ok, ms));
+})();
+</script>
 </body>
 </html>
