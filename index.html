@@ -74,6 +74,16 @@
   .bottone.secondario:active { transform: scale(.96); }
   .link { background: none; border: none; color: #bbb; font-family: var(--macchina); font-size: .9rem; text-decoration: underline; cursor: pointer; padding: 8px; }
   .nascosto { opacity: 0 !important; pointer-events: none !important; }
+  .magia { position: absolute; z-index: 7; left: 50%; top: calc(var(--d) * .98); transform: translateX(-50%); white-space: nowrap;
+    display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px;
+    border: 1px solid rgba(244,233,208,.4); background: rgba(10,6,4,.6); color: var(--crema);
+    font-family: var(--macchina); font-size: .85rem; cursor: pointer; transition: opacity .6s ease, top .9s ease;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .magia .interr { position: relative; width: 34px; height: 18px; border-radius: 9px; background: #5a5048; transition: background .3s; }
+  .magia .interr::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--crema); transition: transform .3s; }
+  .magia.on .interr { background: var(--giallo); }
+  .magia.on .interr::after { transform: translateX(16px); }
+  #diag { position: fixed; z-index: 20; left: 6px; right: 6px; bottom: 4px; font: 11px/1.3 monospace; color: #ff8a80; text-align: center; pointer-events: none; }
   .audio { position: fixed; z-index: 10; top: max(10px, env(safe-area-inset-top)); right: 12px;
     width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(244,233,208,.35);
     background: rgba(0,0,0,.35); color: var(--crema); font-size: 18px; cursor: pointer; padding: 0; }
@@ -175,6 +185,14 @@
 <body>
 <div class="fumo"><i></i><i></i><i></i></div>
 <button id="btnAudio" class="audio" aria-label="Suoni">🔊</button>
+<div id="diag"></div>
+<script>
+  // Diagnosi: se qualcosa si rompe, l'errore compare in fondo allo schermo
+  (() => { const mostra = m => { const d = document.getElementById("diag"); if (d) d.textContent = "⚠ " + m; };
+    window.addEventListener("error", e => mostra((e.message || "errore") + (e.lineno ? " (riga " + e.lineno + ")" : "")));
+    window.addEventListener("unhandledrejection", e => mostra("promise: " + (e.reason && (e.reason.message || e.reason.name) || e.reason)));
+  })();
+</script>
 
 <!-- 1. INTRO -->
 <section id="intro" class="schermata attiva">
@@ -183,7 +201,8 @@
   <h1 class="titolo">COME FECERO<br>I GRECI</h1>
   <div class="data">20 NOVEMBRE 2026 · ORE 21:00</div>
   <p class="medium"><span id="testoMedium"></span><span class="cursore">▌</span></p>
-  <button id="btnInizia" class="bottone nascosto">Scoprilo 🔮</button>
+  <button id="btnEntra" class="bottone nascosto">Tocca per iniziare</button>
+  <button id="btnInizia" class="bottone nascosto" style="display:none">Scoprilo 🔮</button>
   <p id="notaCamera" class="nota nascosto">Ti chiederemo di usare la fotocamera.</p>
 </section>
 
@@ -202,6 +221,7 @@
     </div>
     <div class="base"><i class="piede"></i><i class="corpo"></i><i class="anello"></i></div>
     <div id="scintille" class="scintille"></div>
+    <button id="btnMagia" class="magia nascosto"><span class="interr"></span>Effetto sfera</button>
   </div>
   <div id="risposta" class="risposta">
     <div class="suggerimento">Strofina la sfera col dito…</div>
@@ -252,11 +272,12 @@
     document.querySelectorAll(".schermata").forEach(s => s.classList.toggle("attiva", s.id === id));
   }
 
-  async function scrivi(el, testo, vel = 42) {
+  async function scrivi(el, testo, vel = 55) {
     el.textContent = "";
     for (let i = 1; i <= testo.length; i++) {
       el.textContent = testo.slice(0, i);
       const ch = testo[i - 1];
+      if (ch !== "…") try { suono.tasto(ch); } catch (_) {}
       await attesa(ch === "\n" ? 350 : ch === "…" ? 400 : ch === " " ? 60 : vel);
     }
   }
@@ -270,15 +291,23 @@
   (async () => {
     if (daRiprova) {
       $("testoMedium").textContent = TESTO_MEDIUM;
+      $("btnInizia").style.display = "";
       $("btnInizia").classList.remove("nascosto");
       avviaCamera();
       return;
     }
-    await attesa(900);
+    await attesa(1700);
+    $("btnEntra").classList.remove("nascosto");
+  })();
+  $("btnEntra").addEventListener("click", async () => {
+    suono.avvia();
+    $("btnEntra").style.display = "none";
     await scrivi($("testoMedium"), TESTO_MEDIUM);
+    $("btnInizia").style.display = "";
+    await attesa(50);
     $("btnInizia").classList.remove("nascosto");
     $("notaCamera").classList.remove("nascosto");
-  })();
+  });
 
   // ---------- Fotocamera ----------
   async function avviaCamera() {
@@ -332,7 +361,7 @@
     mostra("errore");
   }
 
-  $("btnInizia").addEventListener("click", () => { suono.avvia(); suono.tintinnio(); avviaCamera(); });
+  $("btnInizia").addEventListener("click", () => { avviaCamera(); suono.avvia(); suono.apri(); });
   $("btnRiprova").addEventListener("click", ricarica);
 
   // Quando l'utente sblocca la fotocamera dalle impostazioni, riparti da solo
@@ -439,15 +468,18 @@
   ["pointerup", "pointercancel"].forEach(t => canvas.addEventListener(t, () => { ultimo = null; }));
 
   // ---------- Suoni (generati al momento, nessun file) ----------
+  // Ogni funzione è protetta: un problema audio non deve mai bloccare la pagina.
   const suono = (() => {
-    let ctx = null, uscita = null, eco = null, rumore = null, fruscio = null, filtroF = null;
-    let attivo = localStorage.getItem("suoni") !== "no";
+    let ctx = null, uscita = null, eco = null, rumore = null;
+    let attivo = true;
+    try { attivo = localStorage.getItem("suoni") !== "no"; } catch (_) {}
     const bottone = $("btnAudio");
     const aggiornaIcona = () => bottone.textContent = attivo ? "🔊" : "🔇";
     aggiornaIcona();
     bottone.addEventListener("click", () => {
-      attivo = !attivo; localStorage.setItem("suoni", attivo ? "si" : "no"); aggiornaIcona();
-      avvia(); if (uscita) uscita.gain.setTargetAtTime(attivo ? .5 : 0, ctx.currentTime, .05);
+      attivo = !attivo; aggiornaIcona();
+      try { localStorage.setItem("suoni", attivo ? "si" : "no"); } catch (_) {}
+      avvia(); if (uscita) uscita.gain.setTargetAtTime(attivo ? .6 : 0, ctx.currentTime, .05);
     });
 
     function avvia() {
@@ -455,85 +487,95 @@
         if (!ctx) {
           const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
           ctx = new AC();
-          uscita = ctx.createGain(); uscita.gain.value = attivo ? .5 : 0; uscita.connect(ctx.destination);
-          // eco leggera per dare un po' di "magia"
-          eco = ctx.createDelay(); eco.delayTime.value = .19;
-          const ritorno = ctx.createGain(); ritorno.gain.value = .32;
-          const ombra = ctx.createBiquadFilter(); ombra.type = "lowpass"; ombra.frequency.value = 2600;
+          uscita = ctx.createGain(); uscita.gain.value = attivo ? .6 : 0; uscita.connect(ctx.destination);
+          eco = ctx.createDelay(); eco.delayTime.value = .16;           // un filo di riverbero, solo per i suoni morbidi
+          const ritorno = ctx.createGain(); ritorno.gain.value = .25;
+          const ombra = ctx.createBiquadFilter(); ombra.type = "lowpass"; ombra.frequency.value = 1500;
           eco.connect(ombra); ombra.connect(ritorno); ritorno.connect(eco); ombra.connect(uscita);
-          // rumore bianco riutilizzabile
           rumore = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-          const d = rumore.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-          // fruscio continuo, si sente solo mentre strofini
-          const src = ctx.createBufferSource(); src.buffer = rumore; src.loop = true;
-          filtroF = ctx.createBiquadFilter(); filtroF.type = "bandpass"; filtroF.frequency.value = 1800; filtroF.Q.value = .9;
-          fruscio = ctx.createGain(); fruscio.gain.value = 0;
-          src.connect(filtroF); filtroF.connect(fruscio); fruscio.connect(uscita); src.start();
+          const d = rumore.getChannelData(0); for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
         }
-        if (ctx.state === "suspended") ctx.resume();
-      } catch (_) { ctx = null; }
+        if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      } catch (e) { ctx = null; }
     }
+    const pronto = () => ctx && attivo && ctx.state === "running";
 
-    function nota(freq, quando, durata, vol, tipo = "sine", conEco = true) {
-      if (!ctx) return;
+    function nota(freq, quando, attacco, durata, vol, tipo = "sine", conEco = false, freqFine = 0) {
       const t = ctx.currentTime + quando;
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = tipo; o.frequency.value = freq;
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .012);
+      o.type = tipo; o.frequency.setValueAtTime(freq, t);
+      if (freqFine) o.frequency.exponentialRampToValueAtTime(freqFine, t + durata);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attacco);
       g.gain.exponentialRampToValueAtTime(.0001, t + durata);
       o.connect(g); g.connect(uscita); if (conEco) g.connect(eco);
       o.start(t); o.stop(t + durata + .05);
     }
-
-    function colpo(quando, durata, vol, freq, tipo = "bandpass", q = 1) {
-      if (!ctx) return;
+    function soffio(quando, durata, vol, freq, tipo = "bandpass", q = 1, freqFine = 0, attacco = .002) {
       const t = ctx.currentTime + quando;
       const s = ctx.createBufferSource(); s.buffer = rumore;
-      const f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.value = freq; f.Q.value = q;
+      const f = ctx.createBiquadFilter(); f.type = tipo; f.Q.value = q; f.frequency.setValueAtTime(freq, t);
+      if (freqFine) f.frequency.exponentialRampToValueAtTime(freqFine, t + durata);
       const g = ctx.createGain();
-      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + durata);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attacco);
+      g.gain.exponentialRampToValueAtTime(.0001, t + durata);
       s.connect(f); f.connect(g); g.connect(uscita);
-      s.start(t, Math.random() * .5); s.stop(t + durata + .02);
+      s.start(t, Math.random() * .8); s.stop(t + durata + .02);
     }
+    const sicuro = fn => (...a) => { try { if (pronto()) fn(...a); } catch (_) {} };
 
-    let ultimoBrillio = 0;
+    let ultimoGrano = 0;
     return {
       avvia,
-      tintinnio() { [1318.5, 1568, 2093, 2637].forEach((f, i) => nota(f, i * .09, 1.1, .12)); },
-      strofina(dist) {
-        if (!ctx || !attivo) return;
-        const t = ctx.currentTime, v = Math.min(.16, dist * .006);
-        fruscio.gain.cancelScheduledValues(t);
-        fruscio.gain.setTargetAtTime(v, t, .03);
-        fruscio.gain.setTargetAtTime(0, t + .08, .12);
-        filtroF.frequency.setTargetAtTime(1400 + Math.min(dist, 40) * 50, t, .05);
-        if (t - ultimoBrillio > .12 && Math.random() < .35) {      // brillantini sparsi
-          ultimoBrillio = t; nota(2200 + Math.random() * 2400, 0, .35, .04);
+      // tasto della macchina da scrivere
+      tasto: sicuro(ch => {
+        if (ch === "\n") {                                   // ritorno del carrello
+          soffio(0, .22, .12, 900, "bandpass", 2, 2600, .03); nota(110, .2, .003, .09, .25, "triangle"); return;
         }
-      },
-      rivela() {
-        if (!ctx) return;
-        const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = "sine"; o.frequency.setValueAtTime(330, t); o.frequency.exponentialRampToValueAtTime(1320, t + .7);
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.1, t + .1); g.gain.exponentialRampToValueAtTime(.0001, t + .9);
-        o.connect(g); g.connect(uscita); g.connect(eco); o.start(t); o.stop(t + 1);
-        [1046.5, 1318.5, 1568, 2093, 2637, 3136].forEach((f, i) => nota(f, .55 + i * .07, 1.4, .09, "triangle"));
-      },
-      carta() { colpo(0, .07, .5, 900, "bandpass", 1.2); nota(150, 0, .09, .18, "sine", false); },
-      bip() { nota(880, 0, .14, .12, "sine", false); },
-      scatto() { colpo(0, .035, .7, 2500, "highpass"); colpo(.07, .05, .5, 1800, "highpass"); }
+        const j = .85 + Math.random() * .3;
+        if (ch === " ") { soffio(0, .05, .25, 600 * j, "bandpass", 1.5); return; }
+        soffio(0, .012, .5, 3500 * j, "highpass", .7);       // scatto metallico
+        soffio(.004, .04, .35, 1300 * j, "bandpass", 3);     // colpo sul rullo
+        nota(180 * j, 0, .002, .05, .18, "triangle");
+      }),
+      // tocco su "Scoprilo": un soffio morbido e basso
+      apri: sicuro(() => { nota(140, 0, .01, .45, .35, "sine", true, 70); soffio(0, .5, .12, 400, "lowpass", 1, 1600, .15); }),
+      // strofinare: brevi soffi d'aria, niente campanelli
+      strofina: sicuro(dist => {
+        const t = ctx.currentTime;
+        if (t - ultimoGrano < .045) return;
+        ultimoGrano = t;
+        soffio(0, .09, Math.min(.14, .02 + dist * .004), 900 + Math.random() * 900, "bandpass", .8, 0, .02);
+      }),
+      // rivelazione: un accordo caldo che cresce + un soffio che sale
+      rivela: sicuro(() => {
+        soffio(0, .9, .14, 300, "lowpass", 1, 2400, .5);
+        [196, 246.9, 293.7, 392].forEach((f, k) => nota(f, .35 + k * .04, .35, 2.2, .07, "triangle", true));
+      }),
+      carta: sicuro(() => { soffio(0, .06, .4, 900, "bandpass", 1.2); nota(150, 0, .002, .08, .16, "sine"); }),
+      bip: sicuro(() => nota(520, 0, .005, .12, .14, "triangle")),
+      scatto: sicuro(() => { soffio(0, .035, .6, 2500, "highpass"); soffio(.07, .05, .45, 1800, "highpass"); }),
+      magia: sicuro(() => { soffio(0, .6, .12, 500, "bandpass", 2, 2000, .2); nota(220, 0, .2, .7, .06, "sine", true, 330); })
     };
   })();
+  // qualsiasi tocco sblocca l'audio (i browser lo vietano prima del primo tocco)
+  document.addEventListener("pointerdown", () => suono.avvia());
 
   // ---------- Sfera 3D (WebGL, senza librerie) ----------
   let sfera3D = null, nebbiaCambiata = false, svanitaDa = 0;
+  let defMeta = 0, defVal = 0, ondaDa = 0;
+  function cambiaEffetto() {
+    if (!sfera3D || !svanita || performance.now() - svanitaDa < 1500) return;
+    defMeta = defMeta ? 0 : 1; ondaDa = performance.now();
+    $("btnMagia").classList.toggle("on", !!defMeta);
+    suono.magia();
+  }
   const SHADER_V = `attribute vec2 pos; varying vec2 vUv;
     void main() { vUv = vec2(pos.x * .5 + .5, .5 - pos.y * .5); gl_Position = vec4(pos, 0., 1.); }`;
   const SHADER_F = `precision mediump float;
     varying vec2 vUv;
     uniform sampler2D uVid, uFog;
     uniform vec2 uScala;
-    uniform float uFogA, uT, uPix, uSpec;
+    uniform float uFogA, uT, uPix, uSpec, uDef, uOnda;
     vec3 vid(vec2 q) {
       vec2 t = q * .5 + .5; if (uSpec > .5) t.x = 1. - t.x;   // specchio dal vivo, foto dritta
       t = (t - .5) * uScala + .5;                       // ritaglio quadrato centrato
@@ -546,7 +588,10 @@
       float z = sqrt(max(1. - r2, 0.));
       vec3 n = vec3(p.x, -p.y, z);
       // faccia senza deformazioni: solo un leggero velo colorato verso il bordo
-      vec3 col = vid(p);
+      float k = mix(1., .6 + .45 * r2, uDef);                               // effetto sfera (0 = naturale)
+      vec2 q = p * k + p * sin(r * 14. - uT * 9.) * .04 * uOnda;              // onda quando si cambia
+      float ab = .012 * uDef;
+      vec3 col = vec3(vid(q * (1. + ab)).r, vid(q).g, vid(q * (1. - ab)).b);
       col = mix(col, vec3(.28, .16, .42), smoothstep(.7, 1., r) * .45);  // spessore del vetro
       vec4 f = texture2D(uFog, vUv);
       col = mix(col, f.rgb, f.a * uFogA);                                   // nebbia da strofinare
@@ -574,7 +619,7 @@
     if (sfera3D) return;
     try {
       const cv = $("vetro3d");
-      const lato = Math.round(latoCss * Math.min(window.devicePixelRatio || 1, 2));
+      const lato = Math.round(latoCss * Math.min(window.devicePixelRatio || 1, 1.5));
       cv.width = cv.height = lato;
       const gl = cv.getContext("webgl", { alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: true });
       if (!gl) return;
@@ -625,6 +670,9 @@
         gl.uniform1f(u("uFogA"), svanitaDa ? Math.max(0, 1 - (t - svanitaDa) / 1400) : 1);
         gl.uniform1f(u("uT"), t / 1000);
         gl.uniform1f(u("uSpec"), specchio ? 1 : 0);
+        defVal += (defMeta - defVal) * .08;
+        gl.uniform1f(u("uDef"), defVal);
+        gl.uniform1f(u("uOnda"), ondaDa ? Math.max(0, 1 - (t - ondaDa) / 1100) : 0);
         gl.viewport(0, 0, lato, lato);
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -720,6 +768,7 @@
     await attesa(6 * 220 + 500);
     box.insertAdjacentHTML("beforeend", `<div class="sottotitolo">LA COSA PIÙ IMPORTANTE DI STASERA</div>
       <div class="motto">${MOTTO}</div>`);
+    if (sfera3D) setTimeout(() => $("btnMagia").classList.remove("nascosto"), 600);
 
     if (senzaCamera) {
       box.insertAdjacentHTML("beforeend", '<button id="btnRicarica" class="link" style="margin-top:4px">Riprova con la fotocamera</button>');
@@ -912,6 +961,8 @@
   });
   $("btnSalva").addEventListener("click", () => fileFoto && scarica());
   $("btnRifai").addEventListener("click", () => mostra("scena"));
+  $("btnMagia").addEventListener("click", e => { e.stopPropagation(); cambiaEffetto(); });
+  $("sfera").addEventListener("click", cambiaEffetto);
 })();
 </script>
 </body>
