@@ -449,11 +449,9 @@
       if (r > 1.) { gl_FragColor = vec4(0.); return; }
       float z = sqrt(max(1. - r2, 0.));
       vec3 n = vec3(p.x, -p.y, z);
-      // rifrazione: ingrandisce al centro, comprime ai bordi, con un filo di aberrazione cromatica
-      float k = .6 + .45 * r2;
-      vec2 q = p * k + vec2(sin(uT * .7), cos(uT * .5)) * .006;
-      vec3 col = vec3(vid(q * 1.012).r, vid(q).g, vid(q * .988).b);
-      col = mix(col, vec3(.28, .16, .42), smoothstep(.55, 1., r) * .5);  // spessore del vetro
+      // faccia senza deformazioni: solo un leggero velo colorato verso il bordo
+      vec3 col = vid(p);
+      col = mix(col, vec3(.28, .16, .42), smoothstep(.7, 1., r) * .45);  // spessore del vetro
       vec4 f = texture2D(uFog, vUv);
       col = mix(col, f.rgb, f.a * uFogA);                                   // nebbia da strofinare
       vec3 L = normalize(vec3(-.55, .62, .6));
