@@ -237,7 +237,18 @@
   }
 
   // ---------- 1. Intro ----------
+  // Se la pagina è stata ricaricata da "Riprova", salta l'intro e riprova subito
+  const daRiprova = sessionStorage.getItem("riprova") === "1";
+  sessionStorage.removeItem("riprova");
+  const ricarica = () => { sessionStorage.setItem("riprova", "1"); location.reload(); };
+
   (async () => {
+    if (daRiprova) {
+      $("testoMedium").textContent = TESTO_MEDIUM;
+      $("btnInizia").classList.remove("nascosto");
+      avviaCamera();
+      return;
+    }
     await attesa(900);
     await scrivi($("testoMedium"), TESTO_MEDIUM);
     $("btnInizia").classList.remove("nascosto");
@@ -283,18 +294,32 @@
     } else if (e && e.name === "NotReadableError") {
       html = `<h2>Fotocamera occupata</h2><p>Un'altra app sta usando la fotocamera. Chiudila e tocca <b>Riprova</b>.</p>`;
     } else {
-      html = `<h2>Il medium ha bisogno di vederti</h2>
-        <p>Senza fotocamera la sfera resta appannata. Per riattivarla:</p>` +
+      html = `<h2>Il medium ha bisogno di vederti</h2>` +
+        (daRiprova ? `<p><b>La fotocamera risulta ancora bloccata.</b></p>` : `<p>Senza fotocamera la sfera resta appannata.</p>`) +
+        `<p>Per sbloccarla:</p>` +
         (ios
-          ? `<ol><li>Tocca <b>aA</b> nella barra dell'indirizzo</li><li>Scegli <b>Impostazioni sito web</b></li><li>Imposta <b>Fotocamera</b> su <b>Consenti</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`
-          : `<ol><li>Tocca l'icona a sinistra dell'indirizzo</li><li>Apri <b>Autorizzazioni</b></li><li>Attiva la <b>Fotocamera</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`);
+          ? `<ol><li>Tocca <b>aA</b> a sinistra dell'indirizzo</li><li>Scegli <b>Impostazioni sito web</b></li><li>Imposta <b>Fotocamera</b> su <b>Chiedi</b> o <b>Consenti</b></li><li>Tocca <b>Riprova</b> qui sotto</li></ol>`
+          : `<ol><li>Tocca l'icona <b>a sinistra dell'indirizzo</b> (quella prima del link)</li><li>Nel riquadro che si apre, attiva <b>Fotocamera</b><br><small>(se non la vedi: <b>Autorizzazioni</b> o <b>Impostazioni sito</b> → Fotocamera → Consenti)</small></li><li>Tocca <b>Riprova</b> qui sotto</li></ol>
+             <p class="nota">Se ancora non va: menu <b>⋮</b> di Chrome → <b>Impostazioni</b> → <b>Impostazioni sito</b> → <b>Fotocamera</b>: controlla che sia attiva e che questo sito non sia tra i <b>Bloccati</b>.</p>`);
+      sorvegliaPermesso();
     }
     $("testoErrore").innerHTML = html;
     mostra("errore");
   }
 
   $("btnInizia").addEventListener("click", avviaCamera);
-  $("btnRiprova").addEventListener("click", () => { mostra("intro"); avviaCamera(); });
+  $("btnRiprova").addEventListener("click", ricarica);
+
+  // Quando l'utente sblocca la fotocamera dalle impostazioni, riparti da solo
+  let sorvegliato = false;
+  async function sorvegliaPermesso() {
+    if (sorvegliato || !navigator.permissions || !navigator.permissions.query) return;
+    try {
+      const st = await navigator.permissions.query({ name: "camera" });
+      sorvegliato = true;
+      st.onchange = () => { if (st.state !== "denied") ricarica(); };
+    } catch (_) { /* browser che non supporta la domanda: resta il pulsante Riprova */ }
+  }
   $("btnSenza").addEventListener("click", () => { senzaCamera = true; $("sfera").classList.add("senza-camera"); apriScena(); });
 
   // ---------- 2. Strofina la sfera ----------
