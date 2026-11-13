@@ -3,204 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#000000">
-<title>Come fecero i Greci ✨</title>
+<meta name="theme-color" content="#0b0705">
+<title>Come fecero i Greci 🔮</title>
+<link rel="preload" href="assets/luckiest-guy.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/special-elite.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face { font-family: "Luckiest Guy"; src: url("assets/luckiest-guy.woff2") format("woff2"); font-display: swap; }
+  @font-face { font-family: "Special Elite"; src: url("assets/special-elite.woff2") format("woff2"); font-display: swap; }
+
   :root {
-    --oro: #d4af37;
-    --oro-chiaro: #f3dc8f;
-    --oro-scuro: #8a6a1f;
-    --serif: "Cinzel", "Trajan Pro", Georgia, "Times New Roman", serif;
-    --meandro: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 12'%3E%3Cpath d='M0 11H10M0 1H10M2 11V3H8V9H4.5V5.5H6' fill='none' stroke='%23d4af37' stroke-width='1'/%3E%3C/svg%3E");
+    --crema: #f4e9d0;
+    --giallo: #f2c230;
+    --rosso: #e04a3a;
+    --rosa: #ff5ac8;
+    --ciano: #4fd8ff;
+    --viola: #7a5cff;
+    --titolo: "Luckiest Guy", "Arial Black", Impact, sans-serif;
+    --macchina: "Special Elite", "Courier New", monospace;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; background: #000; color: #fff; }
+  html, body { margin: 0; height: 100%; color: var(--crema); }
   body {
-    font-family: var(--serif);
+    font-family: var(--macchina);
     overflow: hidden;
     -webkit-user-select: none; user-select: none;
-    background: radial-gradient(ellipse at 50% 30%, #1b1610 0%, #000 70%);
+    background: radial-gradient(ellipse at 50% 40%, #2a1c13 0%, #120c08 55%, #070504 100%);
   }
-  .meandro { height: 22px; width: 100%; background: var(--meandro) repeat-x center / auto 100%; opacity: .85; flex-shrink: 0; }
+
+  /* Fumo magico che si muove sullo sfondo */
+  .fumo { position: fixed; inset: -20%; pointer-events: none; z-index: 0; }
+  .fumo i { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; opacity: .32; }
+  .fumo i:nth-child(1) { background: radial-gradient(circle, var(--rosa) 0%, transparent 62%); left: -10%; bottom: 0; animation: deriva1 18s ease-in-out infinite alternate; }
+  .fumo i:nth-child(2) { background: radial-gradient(circle, var(--ciano) 0%, transparent 62%); right: -15%; bottom: 10%; animation: deriva2 22s ease-in-out infinite alternate; }
+  .fumo i:nth-child(3) { background: radial-gradient(circle, var(--viola) 0%, transparent 62%); left: 20%; top: -10%; opacity: .22; animation: deriva1 26s ease-in-out infinite alternate-reverse; }
 
   .schermata {
-    position: fixed; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    padding: max(14px, env(safe-area-inset-top)) 18px max(14px, env(safe-area-inset-bottom));
+    position: fixed; inset: 0; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; text-align: center;
+    padding: max(16px, env(safe-area-inset-top)) 18px max(16px, env(safe-area-inset-bottom));
     opacity: 0; pointer-events: none; transition: opacity .8s ease;
   }
   .schermata.attiva { opacity: 1; pointer-events: auto; }
-  .centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; gap: 18px; }
 
-  .presenta { font-size: .8rem; letter-spacing: .35em; color: var(--oro); opacity: 0; animation: appari 1.2s .3s forwards; }
+  .piccolo { font-size: .78rem; letter-spacing: .25em; opacity: .85; }
+  .logo { width: 108px; transform: rotate(-3deg); box-shadow: 0 6px 18px rgba(0,0,0,.6); border-radius: 2px; }
+  .logo.mini { width: 64px; }
   .titolo {
-    font-size: clamp(1.9rem, 9vw, 3rem); letter-spacing: .08em; line-height: 1.1; margin: 0;
-    background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 55%, var(--oro-scuro));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    opacity: 0; animation: appari 1.4s .9s forwards;
+    font-family: var(--titolo); font-weight: normal; margin: 0;
+    font-size: clamp(2.3rem, 12vw, 3.6rem); line-height: .98; letter-spacing: .02em;
+    color: var(--crema);
+    -webkit-text-stroke: 1px #6b4a22;
+    text-shadow: 0 1px 0 #c9a46a, 0 2px 0 #b8925a, 0 3px 0 #a5804b, 0 4px 0 #8f6c3c, 0 5px 0 #7a5a30, 0 6px 0 #654a26, 0 10px 18px rgba(0,0,0,.7);
   }
-  .data { font-size: .95rem; letter-spacing: .3em; opacity: 0; animation: appari 1.2s 1.5s forwards; }
-  .domanda { min-height: 4.6em; font-size: clamp(1.15rem, 5.4vw, 1.5rem); line-height: 1.45; max-width: 22em; font-style: italic; }
-  .cursore { display: inline-block; width: .5em; animation: lampeggia 1s steps(1) infinite; color: var(--oro); }
+  .titolo.mini { font-size: clamp(1.4rem, 7vw, 1.9rem); }
+  .data { font-family: var(--titolo); color: var(--giallo); font-size: 1.05rem; letter-spacing: .04em; text-shadow: 0 2px 0 #6b4a10; }
+  .medium { min-height: 6.2em; max-width: 21em; font-size: clamp(1.02rem, 4.8vw, 1.25rem); line-height: 1.5; white-space: pre-line; }
+  .cursore { color: var(--rosa); animation: lampeggia 1s steps(1) infinite; }
 
   .bottone {
-    font-family: var(--serif); font-size: 1.05rem; letter-spacing: .2em; text-transform: uppercase;
-    color: #000; background: linear-gradient(180deg, var(--oro-chiaro), var(--oro) 60%, var(--oro-scuro));
-    border: none; border-radius: 999px; padding: 16px 34px; cursor: pointer;
-    box-shadow: 0 0 24px rgba(212,175,55,.35);
+    font-family: var(--titolo); font-size: 1.15rem; letter-spacing: .06em; color: #fff;
+    background: linear-gradient(90deg, var(--rosa), var(--viola) 50%, var(--ciano));
+    border: none; border-radius: 999px; padding: 15px 30px; cursor: pointer;
+    box-shadow: 0 0 22px rgba(255,90,200,.45), 0 0 34px rgba(79,216,255,.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,.4);
     transition: transform .15s ease, opacity .6s ease;
   }
   .bottone:active { transform: scale(.96); }
-  .bottone.secondario { background: transparent; color: var(--oro); border: 1px solid var(--oro); box-shadow: none; }
+  .bottone:disabled { opacity: .6; }
+  .bottone.secondario { background: transparent; border: 2px solid var(--crema); box-shadow: none; color: var(--crema); padding: 12px 22px; font-size: 1rem; }
+  .link { background: none; border: none; color: #bbb; font-family: var(--macchina); font-size: .9rem; text-decoration: underline; cursor: pointer; padding: 8px; }
   .nascosto { opacity: 0 !important; pointer-events: none !important; }
-  .link { background: none; border: none; color: #aaa; font-family: var(--serif); font-size: .85rem; text-decoration: underline; cursor: pointer; padding: 8px; }
+  .nota { font-size: .82rem; opacity: .75; max-width: 22em; }
 
-  /* --- Gratta --- */
-  .intestazione { font-size: .8rem; letter-spacing: .3em; color: var(--oro); text-align: center; }
-  .cornice {
-    position: relative;
-    width: min(84vw, 50dvh, 400px); aspect-ratio: 3 / 4;
-    border-radius: 18px; overflow: hidden;
-    border: 2px solid var(--oro);
-    box-shadow: 0 0 0 6px #000, 0 0 0 7px rgba(212,175,55,.5), 0 0 40px rgba(212,175,55,.25);
-    background: #111;
+  /* --- Sfera di cristallo --- */
+  .postazione { position: relative; display: flex; flex-direction: column; align-items: center; --d: min(76vw, 44dvh, 360px); }
+  .sfera {
+    position: relative; z-index: 2;
+    width: var(--d); height: var(--d); border-radius: 50%; overflow: hidden;
+    -webkit-mask-image: -webkit-radial-gradient(white, black); isolation: isolate;
+    background: #0d0716;
+    animation: alone 3.5s ease-in-out infinite;
   }
-  .cornice video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-  .cornice.senza-camera { background: radial-gradient(ellipse at 40% 30%, #3a3a3a, #050505 70%); }
-  .cornice.senza-camera::after {
-    content: "Guarda lo schermo:\A ti ci vedi riflesso."; white-space: pre; position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center; text-align: center; color: #ddd; font-style: italic; font-size: 1.1rem; line-height: 1.6;
+  .sfera video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .sfera .vuota {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 18%;
+    background: radial-gradient(circle at 50% 45%, #3b2552, #0d0716 70%);
+    font-family: var(--titolo); font-size: calc(var(--d) * .4); color: rgba(230,220,255,.35);
   }
-  #gratta { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; transition: opacity 1.2s ease; }
-  #gratta.sciolto { opacity: 0; pointer-events: none; }
-  .scintille { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
-  .scintilla {
-    position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; border-radius: 50%;
-    background: radial-gradient(circle, #fff, var(--oro-chiaro) 40%, transparent 70%);
-    animation: esplodi 1.6s ease-out forwards;
+  .sfera.senza-camera .vuota { display: flex; }
+  #nebbia { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; transition: opacity 1.4s ease; }
+  #nebbia.svanita { opacity: 0; pointer-events: none; }
+  .vetro {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none; z-index: 3;
+    background:
+      radial-gradient(ellipse 34% 22% at 32% 22%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 58%, rgba(122,92,255,.35) 80%, rgba(20,8,40,.75) 100%);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.25);
   }
-  .conto { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; color: #fff; text-shadow: 0 0 20px #000; pointer-events: none; }
-  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .base {
+    position: relative; z-index: 1; margin-top: calc(var(--d) * -0.09);
+    width: calc(var(--d) * .62); height: calc(var(--d) * .2);
+    background: linear-gradient(90deg, #3d2410, #c9a24a 30%, #f3dc8f 45%, #a87a2c 65%, #3d2410);
+    clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 8px 8px;
+  }
+  .conto { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; font-family: var(--titolo); font-size: 6rem; color: #fff; text-shadow: 0 0 24px var(--rosa); pointer-events: none; }
+  .flash { position: absolute; inset: 0; z-index: 5; background: #fff; opacity: 0; pointer-events: none; border-radius: 50%; }
   .flash.via { animation: flash .6s ease-out; }
+  .scintille { position: absolute; left: 50%; top: calc(var(--d) / 2); width: 0; height: 0; z-index: 6; pointer-events: none; }
+  .scintilla { position: absolute; width: 9px; height: 9px; border-radius: 50%; animation: esplodi 1.7s ease-out forwards; }
 
-  .risposta { min-height: 7.5em; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; text-align: center; }
-  .suggerimento { font-style: italic; color: #ccc; font-size: 1.05rem; animation: respira 2.2s ease-in-out infinite; }
-  .sei-tu {
-    font-size: clamp(2.6rem, 13vw, 3.6rem); letter-spacing: .12em; margin: 0;
-    background: linear-gradient(180deg, #fff, var(--oro-chiaro) 40%, var(--oro));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: sorgi 1.4s ease forwards;
+  .risposta { min-height: 9.5em; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+  .suggerimento { font-size: 1.05rem; animation: respira 2.2s ease-in-out infinite; }
+
+  /* Lettere ritagliate stile Copia Incolla */
+  .collage { display: flex; gap: 6px; align-items: center; justify-content: center; min-height: 82px; }
+  .lettera {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 54px; height: 70px; font-size: 48px; line-height: 1;
+    box-shadow: 2px 3px 0 rgba(0,0,0,.45);
+    opacity: 0; animation: cadi .55s cubic-bezier(.3,1.6,.5,1) forwards;
   }
-  .gnothi { font-size: .8rem; letter-spacing: .25em; color: var(--oro); opacity: 0; animation: appari 1.5s 1s forwards; }
-  .gnothi small { display: block; color: #999; letter-spacing: .15em; margin-top: 4px; font-style: italic; }
+  .spazio { width: 18px; }
+  .sottotitolo { font-size: .9rem; letter-spacing: .12em; opacity: 0; animation: appari 1s forwards; }
 
   /* --- Foto --- */
-  #anteprima { width: min(80vw, 55dvh * 0.8, 380px); border: 1px solid rgba(212,175,55,.5); border-radius: 6px; box-shadow: 0 0 40px rgba(212,175,55,.2); -webkit-touch-callout: default; user-select: auto; }
-  .riga-bottoni { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-  .nota { font-size: .78rem; color: #888; font-style: italic; max-width: 22em; text-align: center; }
+  #anteprima { height: min(60dvh, 560px); max-width: 86vw; border-radius: 10px; box-shadow: 0 0 30px rgba(255,90,200,.35), 0 0 50px rgba(79,216,255,.2); -webkit-touch-callout: default; user-select: auto; }
+  .riga { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
   /* --- Errore --- */
-  .errore { max-width: 24em; line-height: 1.55; font-size: 1rem; }
-  .errore h2 { color: var(--oro); letter-spacing: .1em; font-weight: normal; }
-  .errore ol { text-align: left; padding-left: 1.2em; }
+  .errore { max-width: 24em; line-height: 1.55; font-size: .98rem; }
+  .errore h2 { font-family: var(--titolo); font-weight: normal; color: var(--giallo); letter-spacing: .03em; margin: 0 0 8px; }
+  .errore ol { text-align: left; padding-left: 1.3em; }
 
+  @keyframes deriva1 { to { transform: translate(18vw, -12vh) scale(1.15); } }
+  @keyframes deriva2 { to { transform: translate(-20vw, -18vh) scale(1.2); } }
+  @keyframes alone {
+    0%,100% { box-shadow: 0 0 34px rgba(255,90,200,.55), 0 0 70px rgba(79,216,255,.3); }
+    50%     { box-shadow: 0 0 48px rgba(79,216,255,.6), 0 0 90px rgba(255,90,200,.35); }
+  }
   @keyframes appari { to { opacity: 1; } }
   @keyframes lampeggia { 50% { opacity: 0; } }
-  @keyframes respira { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
-  @keyframes sorgi { from { opacity: 0; transform: translateY(14px) scale(.96); letter-spacing: .4em; } to { opacity: 1; transform: none; letter-spacing: .12em; } }
+  @keyframes respira { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+  @keyframes cadi { 0% { opacity: 0; transform: translateY(-60px) rotate(0deg) scale(1.4); } 100% { opacity: 1; transform: translateY(var(--dy)) rotate(var(--r)) scale(1); } }
   @keyframes esplodi { 0% { transform: translate(-50%,-50%) scale(.4); opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s)); opacity: 0; } }
   @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
 </style>
 </head>
 <body>
+<div class="fumo"><i></i><i></i><i></i></div>
 
 <!-- 1. INTRO -->
 <section id="intro" class="schermata attiva">
-  <div class="meandro"></div>
-  <div class="centro">
-    <div class="presenta">COPIA INCOLLA APS PRESENTA</div>
-    <h1 class="titolo">COME FECERO<br>I GRECI</h1>
-    <div class="data">20 NOVEMBRE</div>
-    <p class="domanda"><span id="testoDomanda"></span><span class="cursore">|</span></p>
-    <button id="btnInizia" class="bottone nascosto">Scoprilo</button>
-    <p id="notaCamera" class="nota nascosto">Ti chiederemo di usare la fotocamera.</p>
-  </div>
-  <div class="meandro"></div>
+  <div class="piccolo">UNA COMMEDIA TEATRALE DI</div>
+  <img class="logo" src="assets/logo-copia-incolla.jpg" alt="Copia Incolla">
+  <h1 class="titolo">COME FECERO<br>I GRECI</h1>
+  <div class="data">20 NOVEMBRE 2026 · ORE 21:00</div>
+  <p class="medium"><span id="testoMedium"></span><span class="cursore">▌</span></p>
+  <button id="btnInizia" class="bottone nascosto">Scoprilo 🔮</button>
+  <p id="notaCamera" class="nota nascosto">Ti chiederemo di usare la fotocamera.</p>
 </section>
 
-<!-- 2. GRATTA -->
+<!-- 2. SFERA -->
 <section id="scena" class="schermata">
-  <div class="intestazione">COME FECERO I GRECI</div>
-  <div class="centro">
-    <div id="cornice" class="cornice">
+  <h2 class="titolo mini">COME FECERO I GRECI</h2>
+  <div class="postazione">
+    <div id="sfera" class="sfera">
       <video id="video" autoplay playsinline muted></video>
-      <canvas id="gratta"></canvas>
-      <div id="scintille" class="scintille"></div>
+      <div class="vuota">?</div>
+      <canvas id="nebbia"></canvas>
+      <div class="vetro"></div>
       <div id="conto" class="conto"></div>
       <div id="flash" class="flash"></div>
     </div>
-    <div id="risposta" class="risposta">
-      <div id="suggerimento" class="suggerimento">Gratta per scoprirlo…</div>
-    </div>
+    <div class="base"></div>
+    <div id="scintille" class="scintille"></div>
   </div>
-  <div class="meandro"></div>
+  <div id="risposta" class="risposta">
+    <div class="suggerimento">Strofina la sfera col dito…</div>
+  </div>
 </section>
 
 <!-- 3. FOTO -->
 <section id="foto" class="schermata">
-  <div class="intestazione">LA TUA FOTO</div>
-  <div class="centro">
-    <img id="anteprima" alt="La tua foto ricordo">
-    <div class="riga-bottoni">
-      <button id="btnCondividi" class="bottone">Condividi</button>
-      <button id="btnRifai" class="bottone secondario">Rifai</button>
-    </div>
-    <p id="notaSalva" class="nota">Se non si apre la condivisione, tieni premuto sulla foto per salvarla.</p>
+  <img id="anteprima" alt="La tua foto ricordo">
+  <div class="riga">
+    <button id="btnCondividi" class="bottone">Condividi su Instagram</button>
   </div>
-  <div class="meandro"></div>
+  <div class="riga">
+    <button id="btnSalva" class="bottone secondario">Salva</button>
+    <button id="btnRifai" class="bottone secondario">Rifai</button>
+  </div>
+  <p id="notaFoto" class="nota">Nella storia tagga <b>@copia.in.colla</b> ✨</p>
 </section>
 
 <!-- 4. ERRORE FOTOCAMERA -->
 <section id="errore" class="schermata">
-  <div class="meandro"></div>
-  <div class="centro">
-    <div class="errore" id="testoErrore"></div>
-    <button id="btnRiprova" class="bottone">Riprova</button>
-    <button id="btnSenza" class="link">Continua senza fotocamera</button>
-  </div>
-  <div class="meandro"></div>
+  <div class="errore" id="testoErrore"></div>
+  <button id="btnRiprova" class="bottone">Riprova</button>
+  <button id="btnSenza" class="link">Continua senza fotocamera</button>
 </section>
 
 <script>
 (() => {
   const TITOLO = "COME FECERO I GRECI";
-  const DATA = "20 NOVEMBRE";
-  const COMPAGNIA = "COPIA INCOLLA APS";
-  const DOMANDA = "Sai qual è la cosa più importante di questo spettacolo?";
-  const SOGLIA = 0.55; // quota grattata oltre la quale la patina si scioglie
+  const QUANDO = "20 NOVEMBRE 2026 · ORE 21:00";
+  const DOVE = "TEATRO SANT'ANNA · TORINO";
+  const INSTAGRAM = "@copia.in.colla";
+  const TESTO_MEDIUM = "Il medium ha una domanda per te…\n\nSai qual è la cosa più importante di questo spettacolo?";
+  const SOGLIA = 0.55; // quota di nebbia da togliere prima che svanisca da sola
 
   const $ = id => document.getElementById(id);
+  const attesa = ms => new Promise(ok => setTimeout(ok, ms));
   const video = $("video");
-  let stream = null;
-  let senzaCamera = false;
-  let fileFoto = null;
+  const logo = new Image(); logo.src = "assets/logo-copia-incolla.jpg";
+  const fontPronti = Promise.all([
+    document.fonts.load('40px "Luckiest Guy"'), document.fonts.load('40px "Special Elite"')
+  ]).catch(() => {});
+  let senzaCamera = false, fileFoto = null;
 
   function mostra(id) {
     document.querySelectorAll(".schermata").forEach(s => s.classList.toggle("attiva", s.id === id));
   }
 
-  // ---------- 1. Intro: domanda scritta a macchina ----------
-  function scriviDomanda() {
-    const el = $("testoDomanda");
-    let i = 0;
-    const passo = () => {
-      el.textContent = DOMANDA.slice(0, ++i);
-      if (i < DOMANDA.length) setTimeout(passo, DOMANDA[i - 1] === " " ? 70 : 45);
-      else { $("btnInizia").classList.remove("nascosto"); $("notaCamera").classList.remove("nascosto"); }
-    };
-    setTimeout(passo, 2300);
+  async function scrivi(el, testo, vel = 42) {
+    el.textContent = "";
+    for (let i = 1; i <= testo.length; i++) {
+      el.textContent = testo.slice(0, i);
+      const ch = testo[i - 1];
+      await attesa(ch === "\n" ? 350 : ch === "…" ? 400 : ch === " " ? 60 : vel);
+    }
   }
-  scriviDomanda();
+
+  // ---------- 1. Intro ----------
+  (async () => {
+    await attesa(900);
+    await scrivi($("testoMedium"), TESTO_MEDIUM);
+    $("btnInizia").classList.remove("nascosto");
+    $("notaCamera").classList.remove("nascosto");
+  })();
 
   // ---------- Fotocamera ----------
   async function avviaCamera() {
@@ -208,23 +250,24 @@
     btn.textContent = "Un attimo…"; btn.disabled = true;
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw { name: "NonSupportato" };
-      stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false
       });
       video.srcObject = stream;
       await video.play().catch(() => {});
-      // Aspetta che il video mostri davvero immagini, non solo il permesso
-      await new Promise((ok) => {
+      // Aspetta che arrivino immagini vere, non solo il permesso
+      await new Promise(ok => {
         if (video.videoWidth > 0) return ok();
         video.addEventListener("loadeddata", ok, { once: true });
         setTimeout(ok, 3000);
       });
       senzaCamera = false;
+      $("sfera").classList.remove("senza-camera");
       apriScena();
     } catch (e) {
       mostraErrore(e);
     } finally {
-      btn.textContent = "Scoprilo"; btn.disabled = false;
+      btn.textContent = "Scoprilo 🔮"; btn.disabled = false;
     }
   }
 
@@ -233,18 +276,18 @@
     let html;
     if (e && e.name === "NonSupportato") {
       html = `<h2>Fotocamera non disponibile</h2>
-        <p>Questo browser non permette di usare la fotocamera. Probabilmente il link si è aperto dentro un'altra app.</p>
+        <p>Questo browser non permette di usare la fotocamera: probabilmente il link si è aperto dentro un'altra app.</p>
         <p>Apri la pagina in <b>${ios ? "Safari" : "Chrome"}</b> e riprova.</p>`;
     } else if (e && (e.name === "NotFoundError" || e.name === "OverconstrainedError")) {
-      html = `<h2>Nessuna fotocamera trovata</h2><p>Non riusciamo a trovare una fotocamera su questo dispositivo.</p>`;
+      html = `<h2>Nessuna fotocamera</h2><p>Non troviamo una fotocamera su questo dispositivo.</p>`;
     } else if (e && e.name === "NotReadableError") {
       html = `<h2>Fotocamera occupata</h2><p>Un'altra app sta usando la fotocamera. Chiudila e tocca <b>Riprova</b>.</p>`;
     } else {
-      html = `<h2>Ci serve la fotocamera</h2>
-        <p>Senza fotocamera non puoi vedere la risposta. Per riattivarla:</p>` +
+      html = `<h2>Il medium ha bisogno di vederti</h2>
+        <p>Senza fotocamera la sfera resta appannata. Per riattivarla:</p>` +
         (ios
           ? `<ol><li>Tocca <b>aA</b> nella barra dell'indirizzo</li><li>Scegli <b>Impostazioni sito web</b></li><li>Imposta <b>Fotocamera</b> su <b>Consenti</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`
-          : `<ol><li>Tocca il <b>lucchetto</b> accanto all'indirizzo</li><li>Apri <b>Autorizzazioni</b></li><li>Attiva la <b>Fotocamera</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`);
+          : `<ol><li>Tocca l'icona a sinistra dell'indirizzo</li><li>Apri <b>Autorizzazioni</b></li><li>Attiva la <b>Fotocamera</b></li><li>Torna qui e tocca <b>Riprova</b></li></ol>`);
     }
     $("testoErrore").innerHTML = html;
     mostra("errore");
@@ -252,67 +295,59 @@
 
   $("btnInizia").addEventListener("click", avviaCamera);
   $("btnRiprova").addEventListener("click", () => { mostra("intro"); avviaCamera(); });
-  $("btnSenza").addEventListener("click", () => { senzaCamera = true; $("cornice").classList.add("senza-camera"); apriScena(); });
+  $("btnSenza").addEventListener("click", () => { senzaCamera = true; $("sfera").classList.add("senza-camera"); apriScena(); });
 
-  // ---------- 2. Gratta e scopri ----------
-  const canvas = $("gratta");
+  // ---------- 2. Strofina la sfera ----------
+  const canvas = $("nebbia");
   const ctx = canvas.getContext("2d");
   const GRIGLIA = 24;
-  let celle, pulite, raggio, scala, ultimo = null, sciolto = false, pronto = false;
+  let celle, pulite, totali, raggio, scala, ultimo = null, svanita = false, pronta = false;
 
   function apriScena() {
     mostra("scena");
-    if (!pronto) requestAnimationFrame(() => { preparaPatina(); pronto = true; });
+    if (!pronta) { pronta = true; fontPronti.then(() => requestAnimationFrame(preparaNebbia)); }
   }
 
-  function preparaPatina() {
+  function preparaNebbia() {
     const r = canvas.getBoundingClientRect();
     scala = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(r.width * scala);
-    canvas.height = Math.round(r.height * scala);
-    const w = canvas.width, h = canvas.height;
+    const w = canvas.width = Math.round(r.width * scala);
+    const h = canvas.height = Math.round(r.height * scala);
 
-    // Oro spazzolato
-    const g = ctx.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, "#7d5e1a"); g.addColorStop(.22, "#e9cc7a"); g.addColorStop(.45, "#a8802c");
-    g.addColorStop(.62, "#f6e3a1"); g.addColorStop(.82, "#b38a33"); g.addColorStop(1, "#6e5216");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    for (let i = 0; i < w * h / 60; i++) {
-      ctx.fillStyle = Math.random() < .5 ? "rgba(255,255,230,.18)" : "rgba(60,40,0,.15)";
-      ctx.fillRect(Math.random() * w, Math.random() * h, scala, scala * (1 + Math.random() * 3));
+    const fondo = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * .6);
+    fondo.addColorStop(0, "#5b3a86"); fondo.addColorStop(1, "#160b26");
+    ctx.fillStyle = fondo; ctx.fillRect(0, 0, w, h);
+
+    ctx.globalCompositeOperation = "screen";
+    const colori = ["255,90,200", "79,216,255", "122,92,255", "255,255,255"];
+    for (let i = 0; i < 38; i++) {
+      const x = Math.random() * w, y = Math.random() * h, rr = w * (.12 + Math.random() * .3);
+      const col = colori[i % 4], a = col === "255,255,255" ? .18 : .35 + Math.random() * .25;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, rr);
+      g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
     }
-    // Meandri in alto e in basso
-    ctx.strokeStyle = "rgba(70,48,5,.55)"; ctx.lineWidth = 2 * scala;
-    disegnaMeandro(ctx, 0, 14 * scala, w, 16 * scala);
-    disegnaMeandro(ctx, 0, h - 30 * scala, w, 16 * scala);
-    // Scritta incisa
+    for (let i = 0; i < 70; i++) {
+      ctx.fillStyle = `rgba(255,255,255,${.3 + Math.random() * .6})`;
+      ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, (.5 + Math.random() * 1.6) * scala, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = "source-over";
+
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = `${30 * scala}px ${getComputedStyle(document.body).fontFamily}`;
-    ctx.fillStyle = "rgba(255,245,210,.55)"; ctx.fillText("GRATTA QUI", w / 2 + scala, h / 2 + scala);
-    ctx.fillStyle = "rgba(70,48,5,.8)"; ctx.fillText("GRATTA QUI", w / 2, h / 2);
-    ctx.font = `${44 * scala}px sans-serif`;
-    ctx.fillText("☝︎", w / 2, h / 2 + 56 * scala);
+    ctx.font = `${24 * scala}px "Special Elite", monospace`;
+    ctx.shadowColor = "rgba(255,90,200,.9)"; ctx.shadowBlur = 14 * scala;
+    ctx.fillStyle = "#fff";
+    ctx.fillText("STROFINA", w / 2, h / 2 - 16 * scala);
+    ctx.fillText("LA SFERA", w / 2, h / 2 + 16 * scala);
+    ctx.shadowBlur = 0;
 
-    raggio = Math.max(26, r.width * 0.09) * scala;
-    celle = new Uint8Array(GRIGLIA * GRIGLIA); pulite = 0;
-  }
-
-  function disegnaMeandro(c, x0, y, larghezza, u) {
-    // u = altezza della fascia; ogni modulo è largo quanto alto
-    c.beginPath();
-    c.moveTo(x0, y + u); c.lineTo(x0 + larghezza, y + u);
-    c.moveTo(x0, y); c.lineTo(x0 + larghezza, y);
-    for (let x = x0; x < x0 + larghezza; x += u) {
-      const k = u / 10;
-      c.moveTo(x + 2 * k, y + u); c.lineTo(x + 2 * k, y + 3 * k); c.lineTo(x + 8 * k, y + 3 * k);
-      c.lineTo(x + 8 * k, y + 8 * k); c.lineTo(x + 4.5 * k, y + 8 * k); c.lineTo(x + 4.5 * k, y + 5.5 * k); c.lineTo(x + 6 * k, y + 5.5 * k);
+    raggio = Math.max(24, r.width * 0.1) * scala;
+    // Conta solo le celle dentro il cerchio
+    celle = new Uint8Array(GRIGLIA * GRIGLIA); totali = 0; pulite = 0;
+    for (let rr = 0; rr < GRIGLIA; rr++) for (let cc = 0; cc < GRIGLIA; cc++) {
+      const dx = (cc + .5) / GRIGLIA - .5, dy = (rr + .5) / GRIGLIA - .5;
+      if (dx * dx + dy * dy <= .25) totali++; else celle[rr * GRIGLIA + cc] = 2;
     }
-    c.stroke();
-  }
-
-  function puntoDa(e) {
-    const r = canvas.getBoundingClientRect();
-    return { x: (e.clientX - r.left) * scala, y: (e.clientY - r.top) * scala };
   }
 
   function segnaCelle(x, y) {
@@ -327,53 +362,121 @@
     }
   }
 
-  function gratta(p) {
+  function strofina(p) {
+    if (!celle) return;
+    const da = ultimo || p;
     ctx.globalCompositeOperation = "destination-out";
     ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = raggio * 2;
-    ctx.beginPath();
-    const da = ultimo || p;
-    ctx.moveTo(da.x, da.y); ctx.lineTo(p.x + .01, p.y);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(da.x, da.y); ctx.lineTo(p.x + .01, p.y); ctx.stroke();
     ctx.globalCompositeOperation = "source-over";
-    const dist = Math.hypot(p.x - da.x, p.y - da.y), passi = Math.max(1, Math.ceil(dist / (raggio / 2)));
+    const passi = Math.max(1, Math.ceil(Math.hypot(p.x - da.x, p.y - da.y) / (raggio / 2)));
     for (let i = 0; i <= passi; i++) segnaCelle(da.x + (p.x - da.x) * i / passi, da.y + (p.y - da.y) * i / passi);
     ultimo = p;
-    if (!sciolto && pulite / celle.length >= SOGLIA) rivela();
+    if (!svanita && pulite / totali >= SOGLIA) rivela();
   }
 
-  canvas.addEventListener("pointerdown", e => { if (sciolto) return; canvas.setPointerCapture(e.pointerId); ultimo = null; gratta(puntoDa(e)); });
-  canvas.addEventListener("pointermove", e => { if (sciolto || !canvas.hasPointerCapture(e.pointerId)) return; gratta(puntoDa(e)); });
+  const punto = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * scala, y: (e.clientY - r.top) * scala }; };
+  canvas.addEventListener("pointerdown", e => { if (svanita) return; canvas.setPointerCapture(e.pointerId); ultimo = null; strofina(punto(e)); });
+  canvas.addEventListener("pointermove", e => { if (!svanita && canvas.hasPointerCapture(e.pointerId)) strofina(punto(e)); });
   ["pointerup", "pointercancel"].forEach(t => canvas.addEventListener(t, () => { ultimo = null; }));
 
-  function rivela() {
-    sciolto = true;
-    canvas.classList.add("sciolto");
-    if (navigator.vibrate) navigator.vibrate([40, 60, 80]);
+  // ---------- Lettere ritagliate ----------
+  const CARTE = [["#f2c230", "#1d1d1d"], ["#d8352a", "#f6ecd6"], ["#2f5fa8", "#f6ecd6"], ["#f1e4c8", "#c22f26"],
+                 ["#3a8f4a", "#f6ecd6"], ["#1d1d1d", "#f2c230"], ["#e8822a", "#1d1d1d"], ["#f6ecd6", "#2f5fa8"]];
+  const FONT = ['"Luckiest Guy", sans-serif', 'bold Georgia, serif', '900 "Arial Black", Impact, sans-serif',
+                '"Special Elite", monospace', 'italic bold "Times New Roman", serif'];
+  const casuale = (a, b) => a + Math.random() * (b - a);
+
+  function creaLettere(parola) {
+    const carte = CARTE.slice().sort(() => Math.random() - .5);
+    let k = 0;
+    return [...parola].map((ch, i) => ch === " " ? null : {
+      ch, bg: carte[k % carte.length][0], fg: carte[k++ % carte.length][1],
+      font: FONT[(i + Math.floor(Math.random() * FONT.length)) % FONT.length],
+      r: casuale(-9, 9), dy: casuale(-6, 6),
+      bordo: Array.from({ length: 8 }, () => casuale(0, 7)) // strappi della carta, in %
+    });
+  }
+  // "bold Georgia, serif" + 46 -> "bold 46px Georgia, serif"
+  const fontDi = (l, px) => { const m = l.font.match(/^((?:italic |bold |900 )*)(.*)$/); return `${m[1]}${px}px ${m[2]}`; };
+  const poligono = b => [[b[0], b[1]], [100 - b[2], b[3]], [100 - b[4], 100 - b[5]], [b[6], 100 - b[7]]];
+
+  function collageHTML(lettere) {
+    return `<div class="collage">${lettere.map((l, i) => l === null ? '<span class="spazio"></span>' :
+      `<span class="lettera" style="background:${l.bg};color:${l.fg};font:${fontDi(l, 46).replace(/"/g, "'")};` +
+      `--r:${l.r}deg;--dy:${l.dy}px;animation-delay:${i * .22}s;` +
+      `clip-path:polygon(${poligono(l.bordo).map(p => p[0] + "% " + p[1] + "%").join(",")})">${l.ch}</span>`).join("")}</div>`;
+  }
+
+  function disegnaCollage(c, lettere, cx, y, w, h, gap, spazio) {
+    const larg = lettere.reduce((s, l) => s + (l ? w : spazio) + gap, -gap);
+    let x = cx - larg / 2;
+    for (const l of lettere) {
+      if (!l) { x += spazio + gap; continue; }
+      c.save();
+      c.translate(x + w / 2, y + h / 2 + l.dy * 2); c.rotate(l.r * Math.PI / 180);
+      c.beginPath();
+      poligono(l.bordo).forEach(([px, py], i) => c[i ? "lineTo" : "moveTo"]((px / 100 - .5) * w, (py / 100 - .5) * h));
+      c.closePath();
+      c.shadowColor = "rgba(0,0,0,.5)"; c.shadowOffsetX = 5; c.shadowOffsetY = 7;
+      c.fillStyle = l.bg; c.fill();
+      c.shadowColor = "transparent";
+      c.font = fontDi(l, h * .66);
+      c.fillStyle = l.fg; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText(l.ch, 0, h * .04);
+      c.restore();
+      x += w + gap;
+    }
+  }
+
+  // ---------- Rivelazione ----------
+  let lettere = null;
+  async function rivela() {
+    svanita = true;
+    canvas.classList.add("svanita");
+    if (navigator.vibrate) navigator.vibrate([40, 60, 90]);
+    scintille();
+
+    const box = $("risposta");
+    box.innerHTML = '<div class="medium" style="min-height:0"><span id="spiriti"></span></div>';
+    await attesa(500);
+    await scrivi($("spiriti"), senzaCamera ? "Gli spiriti non ti vedono… ma la risposta la sanno lo stesso:" : "Gli spiriti hanno parlato…", 50);
+    await attesa(300);
+
+    lettere = creaLettere("SEI TU");
+    box.insertAdjacentHTML("beforeend", collageHTML(lettere));
+    await attesa(6 * 220 + 500);
+    box.insertAdjacentHTML("beforeend", '<div class="sottotitolo">LA COSA PIÙ IMPORTANTE DI STASERA</div>');
+
+    if (senzaCamera) {
+      box.insertAdjacentHTML("beforeend", '<button id="btnRicarica" class="link" style="margin-top:4px">Riprova con la fotocamera</button>');
+      $("btnRicarica").addEventListener("click", () => location.reload());
+    } else {
+      await attesa(900);
+      box.insertAdjacentHTML("beforeend", '<button id="btnScatta" class="bottone" style="margin-top:6px">📸 Scatta la foto</button>');
+      $("btnScatta").addEventListener("click", scatta);
+    }
+  }
+
+  function scintille() {
     const box = $("scintille");
-    for (let i = 0; i < 46; i++) {
+    const colori = ["#ff5ac8", "#4fd8ff", "#ffffff", "#f2c230", "#7a5cff"];
+    for (let i = 0; i < 50; i++) {
       const s = document.createElement("span");
       s.className = "scintilla";
-      const ang = Math.random() * Math.PI * 2, d = 90 + Math.random() * 180;
-      s.style.setProperty("--dx", `${Math.cos(ang) * d}px`);
-      s.style.setProperty("--dy", `${Math.sin(ang) * d}px`);
+      const a = Math.random() * Math.PI * 2, d = 110 + Math.random() * 170;
+      const c = colori[i % colori.length];
+      s.style.background = `radial-gradient(circle, #fff, ${c} 45%, transparent 72%)`;
+      s.style.setProperty("--dx", `${Math.cos(a) * d}px`);
+      s.style.setProperty("--dy", `${Math.sin(a) * d}px`);
       s.style.setProperty("--s", (0.6 + Math.random() * 1.8).toFixed(2));
       s.style.animationDelay = `${Math.random() * .35}s`;
       box.appendChild(s);
     }
-    setTimeout(() => box.innerHTML = "", 2500);
-
-    $("risposta").innerHTML = `
-      <h2 class="sei-tu">SEI TU.</h2>
-      <div class="gnothi">ΓΝΩΘΙ ΣΕΑΥΤΟΝ<small>conosci te stesso</small></div>
-      ${senzaCamera ? "" : '<button id="btnScatta" class="bottone nascosto" style="margin-top:8px">📸 Scatta la foto</button>'}`;
-    if (!senzaCamera) {
-      const b = $("btnScatta");
-      setTimeout(() => b.classList.remove("nascosto"), 2200);
-      b.addEventListener("click", scatta);
-    }
+    setTimeout(() => box.innerHTML = "", 2600);
   }
 
-  // ---------- 3. Foto ricordo ----------
+  // ---------- 3. Foto per la storia ----------
   async function scatta() {
     const b = $("btnScatta"); b.disabled = true;
     const conto = $("conto");
@@ -381,75 +484,134 @@
     conto.textContent = "";
     const fl = $("flash"); fl.classList.remove("via"); void fl.offsetWidth; fl.classList.add("via");
 
+    await fontPronti;
     const tela = componiFoto();
     const blob = await new Promise(ok => tela.toBlob(ok, "image/jpeg", 0.9));
     fileFoto = new File([blob], "come-fecero-i-greci.jpg", { type: "image/jpeg" });
     $("anteprima").src = URL.createObjectURL(blob);
 
-    const puoCondividere = !!(navigator.canShare && navigator.canShare({ files: [fileFoto] }));
-    $("btnCondividi").textContent = puoCondividere ? "Condividi" : "Salva";
+    const puo = !!(navigator.canShare && navigator.canShare({ files: [fileFoto] }));
+    $("btnCondividi").textContent = puo ? "Condividi su Instagram" : "Salva la foto";
+    $("btnSalva").style.display = puo ? "" : "none";
+    $("notaFoto").innerHTML = puo
+      ? `Scegli <b>Instagram</b> e poi <b>Storia</b>. Tagga <b>${INSTAGRAM}</b> ✨`
+      : `Salva la foto e pubblicala nella tua storia. Tagga <b>${INSTAGRAM}</b> ✨<br>Se non si scarica, tieni premuto sulla foto.`;
     b.disabled = false;
     setTimeout(() => mostra("foto"), 350);
   }
 
+  function titolo3D(c, testo, x, y, px) {
+    c.font = `${px}px "Luckiest Guy", "Arial Black", sans-serif`;
+    c.textAlign = "center"; c.textBaseline = "alphabetic";
+    const strati = ["#654a26", "#7a5a30", "#8f6c3c", "#a5804b", "#b8925a", "#c9a46a"];
+    const passo = px / 22;
+    c.save(); c.shadowColor = "rgba(0,0,0,.7)"; c.shadowBlur = px * .25; c.shadowOffsetY = px * .1;
+    c.fillStyle = strati[0]; c.fillText(testo, x, y + passo * 6); c.restore();
+    strati.forEach((col, i) => { c.fillStyle = col; c.fillText(testo, x, y + passo * (6 - i)); });
+    c.lineWidth = px / 28; c.strokeStyle = "#6b4a22"; c.strokeText(testo, x, y);
+    c.fillStyle = "#f4e9d0"; c.fillText(testo, x, y);
+  }
+
+  function nuvola(c, x, y, r, col, a) {
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`);
+    c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
   function componiFoto() {
-    const W = 1080, H = 1350;
+    const W = 1080, H = 1920;
     const t = document.createElement("canvas"); t.width = W; t.height = H;
     const c = t.getContext("2d");
-    const font = getComputedStyle(document.body).fontFamily;
 
-    const sf = c.createRadialGradient(W / 2, H * .35, 50, W / 2, H * .4, H * .8);
-    sf.addColorStop(0, "#1e1810"); sf.addColorStop(1, "#000");
+    // Sfondo scuro con fumo magico
+    const sf = c.createRadialGradient(W / 2, H * .45, 60, W / 2, H * .45, H * .75);
+    sf.addColorStop(0, "#2a1c13"); sf.addColorStop(.6, "#120c08"); sf.addColorStop(1, "#050302");
     c.fillStyle = sf; c.fillRect(0, 0, W, H);
+    c.globalCompositeOperation = "screen";
+    nuvola(c, 150, 1250, 650, "255,90,200", .38);
+    nuvola(c, 950, 1150, 650, "79,216,255", .32);
+    nuvola(c, 540, 300, 600, "122,92,255", .18);
+    c.globalCompositeOperation = "source-over";
 
-    c.strokeStyle = "#d4af37"; c.lineWidth = 3;
-    disegnaMeandro(c, 0, 34, W, 36);
-    disegnaMeandro(c, 0, H - 70, W, 36);
+    // Intestazione
+    c.fillStyle = "#f4e9d0"; c.textAlign = "center"; c.textBaseline = "alphabetic";
+    c.font = '34px "Special Elite", monospace';
+    c.fillText("UNA COMMEDIA TEATRALE DI", W / 2, 105);
+    if (logo.complete && logo.naturalWidth) {
+      const lw = 230, lh = lw * logo.naturalHeight / logo.naturalWidth;
+      c.save(); c.translate(W / 2, 135 + lh / 2); c.rotate(-3 * Math.PI / 180);
+      c.shadowColor = "rgba(0,0,0,.6)"; c.shadowBlur = 24; c.shadowOffsetY = 8;
+      c.drawImage(logo, -lw / 2, -lh / 2, lw, lh); c.restore();
+    }
+    titolo3D(c, "COME FECERO", W / 2, 470, 122);
+    titolo3D(c, "I GRECI", W / 2, 590, 122);
 
-    const testo = (s, y, px, colore, spaz) => {
-      c.font = `${px}px ${font}`; c.fillStyle = colore; c.textAlign = "center"; c.textBaseline = "alphabetic";
-      if ("letterSpacing" in c) c.letterSpacing = `${spaz}px`;
-      c.fillText(s, W / 2 + (("letterSpacing" in c) ? spaz / 2 : 0), y);
-    };
-
-    testo("LA COSA PIÙ IMPORTANTE DI STASERA", 140, 38, "#d4af37", 4);
-
-    // Foto ritagliata e specchiata
-    const fx = 110, fy = 175, fw = 860, fh = 830;
-    const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
-    const sc = Math.max(fw / vw, fh / vh), sw = fw / sc, sh = fh / sc;
+    // Sfera
+    const cx = W / 2, cy = 935, R = 280;
     c.save();
-    c.beginPath(); c.rect(fx, fy, fw, fh); c.clip();
-    c.translate(fx + fw, fy); c.scale(-1, 1);
-    c.drawImage(video, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, fw, fh);
+    const bg = c.createLinearGradient(cx - 190, 0, cx + 190, 0);
+    bg.addColorStop(0, "#3d2410"); bg.addColorStop(.3, "#c9a24a"); bg.addColorStop(.45, "#f3dc8f"); bg.addColorStop(.65, "#a87a2c"); bg.addColorStop(1, "#3d2410");
+    c.fillStyle = bg;
+    c.beginPath(); c.moveTo(cx - 150, cy + R * .78); c.lineTo(cx + 150, cy + R * .78); c.lineTo(cx + 190, cy + R * 1.17); c.lineTo(cx - 190, cy + R * 1.17); c.closePath(); c.fill();
     c.restore();
-    c.lineWidth = 6; c.strokeRect(fx - 3, fy - 3, fw + 6, fh + 6);
-    c.lineWidth = 1.5; c.strokeRect(fx - 16, fy - 16, fw + 32, fh + 32);
 
-    const oro = c.createLinearGradient(0, 1040, 0, 1130);
-    oro.addColorStop(0, "#fff8dc"); oro.addColorStop(.5, "#f3dc8f"); oro.addColorStop(1, "#c9a032");
-    testo("SEI TU", 1128, 104, oro, 14);
-    testo(TITOLO, 1200, 46, "#ffffff", 5);
-    testo(`${DATA}  ·  ${COMPAGNIA}`, 1250, 28, "#d4af37", 4);
+    c.save(); c.globalCompositeOperation = "screen";
+    nuvola(c, cx - 60, cy, R * 1.55, "255,90,200", .55);
+    nuvola(c, cx + 60, cy, R * 1.55, "79,216,255", .45);
+    c.restore();
+
+    c.save();
+    c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.clip();
+    c.fillStyle = "#0d0716"; c.fillRect(cx - R, cy - R, R * 2, R * 2);
+    const vw = video.videoWidth || 1, vh = video.videoHeight || 1, lato = Math.min(vw, vh);
+    c.translate(cx + R, cy - R); c.scale(-1, 1);
+    c.drawImage(video, (vw - lato) / 2, (vh - lato) / 2, lato, lato, 0, 0, R * 2, R * 2);
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    const bordo = c.createRadialGradient(cx, cy, R * .58, cx, cy, R);
+    bordo.addColorStop(0, "rgba(0,0,0,0)"); bordo.addColorStop(.75, "rgba(122,92,255,.35)"); bordo.addColorStop(1, "rgba(20,8,40,.8)");
+    c.fillStyle = bordo; c.fillRect(cx - R, cy - R, R * 2, R * 2);
+    c.save(); c.translate(cx - R * .36, cy - R * .56); c.scale(1, .65);
+    const luce = c.createRadialGradient(0, 0, 0, 0, 0, R * .42);
+    luce.addColorStop(0, "rgba(255,255,255,.55)"); luce.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = luce; c.beginPath(); c.arc(0, 0, R * .42, 0, Math.PI * 2); c.fill(); c.restore();
+    c.restore();
+    c.lineWidth = 4; c.strokeStyle = "rgba(255,255,255,.4)";
+    c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+
+    // Risposta
+    c.fillStyle = "#f4e9d0"; c.font = '38px "Special Elite", monospace'; c.textAlign = "center";
+    c.fillText("LA COSA PIÙ IMPORTANTE DI STASERA", W / 2, 1320);
+    disegnaCollage(c, lettere || creaLettere("SEI TU"), W / 2, 1360, 132, 168, 16, 56);
+
+    // Info
+    c.textAlign = "center";
+    c.font = '54px "Luckiest Guy", sans-serif';
+    c.fillStyle = "#6b4a10"; c.fillText(QUANDO, W / 2, 1664);
+    c.fillStyle = "#f2c230"; c.fillText(QUANDO, W / 2, 1660);
+    c.font = '50px "Luckiest Guy", sans-serif';
+    c.fillStyle = "#5a140e"; c.fillText(DOVE, W / 2, 1734);
+    c.fillStyle = "#e04a3a"; c.fillText(DOVE, W / 2, 1730);
+    c.fillStyle = "#f4e9d0"; c.font = '40px "Special Elite", monospace';
+    c.fillText(INSTAGRAM, W / 2, 1830);
     return t;
+  }
+
+  function scarica() {
+    const a = document.createElement("a");
+    a.href = $("anteprima").src; a.download = fileFoto.name;
+    document.body.appendChild(a); a.click(); a.remove();
   }
 
   $("btnCondividi").addEventListener("click", async () => {
     if (!fileFoto) return;
     if (navigator.canShare && navigator.canShare({ files: [fileFoto] })) {
-      try {
-        await navigator.share({ files: [fileFoto], title: TITOLO, text: `La cosa più importante di stasera? Io. ✨ ${TITOLO} – ${DATA}` });
-        return;
-      } catch (e) { if (e.name === "AbortError") return; }
+      try { await navigator.share({ files: [fileFoto] }); return; }
+      catch (e) { if (e.name === "AbortError") return; }
     }
-    const a = document.createElement("a");
-    a.href = $("anteprima").src; a.download = fileFoto.name;
-    document.body.appendChild(a); a.click(); a.remove();
+    scarica();
   });
-
+  $("btnSalva").addEventListener("click", () => fileFoto && scarica());
   $("btnRifai").addEventListener("click", () => mostra("scena"));
-
-  const attesa = ms => new Promise(ok => setTimeout(ok, ms));
 })();
 </script>
 </body>
