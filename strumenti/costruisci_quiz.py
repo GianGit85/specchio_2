@@ -251,7 +251,14 @@ pagina = r'''<!DOCTYPE html>
     $("risultato").textContent = testo.charAt(0).toUpperCase() + testo.slice(1);
     $("risultato").classList.remove("nascosto"); $("risultato").classList.add("appare");
     suono.rivela(); if (navigator.vibrate) navigator.vibrate([40, 60, 90]);
-    const messaggio = `Ho scoperto chi ero nella vita precedente: ${testo} 😂\n…e gli spiriti hanno detto qualcosa anche su di te 👀 Scopri cosa 👉 ${SITO}r/${n}.html\n(è il gioco di Come fecero i Greci, spettacolo teatrale)`;
+    // Messaggio scritto come lo scriverebbe una persona (più versioni, così non sembra un messaggio a catena)
+    const apertura = [
+      `Ahah ho appena fatto questo giochino: a quanto pare nella vita precedente ero ${testo} 😂 Dice che ha scoperto qualcosa anche su di te… fallo e dimmi cosa ti esce!`,
+      `Ti giuro, ho fatto questo quiz e nella vita precedente ero ${testo} 😅 C'è anche una cosa su di te, provalo e fammi sapere!`,
+      `Ho appena scoperto che nella vita precedente ero ${testo}… non commentare 😂 Gli spiriti hanno detto qualcosa anche su di te, prova!`,
+      `Ok, secondo questo gioco nella vita precedente ero ${testo} 🤣 Dice qualcosa anche su di te, voglio troppo sapere cosa ti esce!`
+    ];
+    const messaggio = `${apertura[Math.floor(Math.random() * apertura.length)]}\n\nÈ il gioco di uno spettacolo teatrale, "Come fecero i Greci" 🎭\n${SITO}r/${n}.html`;
     $("btnWhatsapp").href = $("btnWhatsapp2").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
     if (amico) {
       $("confronto").style.display = "";
