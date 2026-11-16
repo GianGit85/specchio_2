@@ -89,6 +89,27 @@ pagina = r'''<!DOCTYPE html>
   .gancio { font-size: .98rem; max-width: 21em; line-height: 1.45; font-style: italic; opacity: .9; }
   .azioni { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
+  /* Pagina iniziale: prima il gioco */
+  .firma { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: .78rem; opacity: .8; text-align: left; line-height: 1.35; }
+  .firma img { width: 46px; transform: rotate(-3deg); box-shadow: 0 3px 8px rgba(0,0,0,.6); }
+  /* Esito: pagina che scorre */
+  #esito { justify-content: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: max(28px, env(safe-area-inset-top)); padding-bottom: 40px; }
+  .ponte { font-family: var(--titolo); color: var(--giallo); font-size: clamp(1.15rem, 5.6vw, 1.5rem); line-height: 1.15; text-shadow: 0 2px 0 #6b4a10; max-width: 16em; margin: 10px 0 0; }
+  .confronto { background: var(--carta); color: var(--inchiostro); padding: 10px 14px; max-width: 22em; transform: rotate(1deg); box-shadow: 4px 6px 0 rgba(0,0,0,.45); font-size: .9rem; line-height: 1.45; text-align: left; }
+  .confronto b { color: #c22f26; }
+  .scheda { width: min(100%, 380px); background: rgba(0,0,0,.35); border: 1px solid rgba(244,233,208,.2); border-radius: 14px; padding: 12px 12px 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .locandina { width: 100%; max-height: 30vh; object-fit: cover; object-position: center 18%; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.6); }
+  .sinossi { font-size: .95rem; line-height: 1.5; max-width: 22em; }
+  .quando { font-family: var(--titolo); color: var(--giallo); font-size: 1.15rem; text-shadow: 0 2px 0 #6b4a10; line-height: 1.2; }
+  .dove { font-family: var(--titolo); color: var(--rosso); font-size: 1rem; text-shadow: 0 2px 0 #5a140e; }
+  .sfida { font-size: .95rem; opacity: .9; margin: 10px 0 0; }
+  .toast { position: fixed; z-index: 20; left: 12px; right: 12px; bottom: max(14px, env(safe-area-inset-bottom)); background: var(--carta); color: var(--inchiostro);
+    border-radius: 14px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.6); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+    transform: translateY(140%); transition: transform .45s cubic-bezier(.3,1.3,.5,1); }
+  .toast.su { transform: none; }
+  .toast p { margin: 0; font-size: 1rem; line-height: 1.4; }
+  .toast .chiudi { position: absolute; top: 4px; right: 10px; background: none; border: none; font-size: 1.3rem; color: var(--inchiostro); cursor: pointer; }
   @keyframes deriva1 { to { transform: translate(18vw, -12vh) scale(1.15); } }
   @keyframes deriva2 { to { transform: translate(-20vw, -18vh) scale(1.2); } }
   @keyframes entra { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
@@ -103,13 +124,11 @@ pagina = r'''<!DOCTYPE html>
 
 <!-- 1. INIZIO -->
 <section id="inizio" class="schermata attiva">
-  <div class="piccolo">UNA COMMEDIA TEATRALE DI</div>
-  <img class="logo" src="assets/logo-copia-incolla.jpg" alt="Copia Incolla">
-  <h1 class="titolo">COME FECERO<br>I GRECI</h1>
   <div id="amico" class="amico" style="display:none"></div>
-  <p class="domanda-grande">Chi eri nella vita precedente?</p>
-  <p class="sotto">5 domande, 30 secondi.<br>Gli spiriti sanno tutto.</p>
-  <button id="btnInizia" class="bottone">Scoprilo 🔮</button>
+  <h1 class="titolo">CHI ERI NELLA<br>VITA PRECEDENTE?</h1>
+  <p class="sotto">5 domande. Gli spiriti sanno tutto.</p>
+  <button id="btnInizia" class="bottone">Scoprilo in 30 secondi 🔮</button>
+  <div class="firma"><img src="assets/logo-copia-incolla.jpg" alt=""><span>Un gioco di <b>Come fecero i Greci</b><br>commedia teatrale di Copia Incolla</span></div>
 </section>
 
 <!-- 2. DOMANDE -->
@@ -131,18 +150,35 @@ pagina = r'''<!DOCTYPE html>
   <p class="intro-ris" id="introRis"></p>
   <h3 class="risultato nascosto" id="risultato"></h3>
   <div class="azioni nascosto" id="azioni">
-    <a id="btnWhatsapp" class="bottone whatsapp" target="_blank" rel="noopener">Condividi su WhatsApp</a>
-    <p class="gancio">In <b>Come fecero i Greci</b> nessuno è chi sembra…</p>
-    <a id="btnPrenota" class="bottone prenota" target="_blank" rel="noopener">🎟️ Prenota il tuo posto</a>
+    <div id="confronto" class="confronto" style="display:none"></div>
+    <p class="ponte">Non sei l'unico tornato da una vita precedente…</p>
+    <div class="scheda">
+      <img class="locandina" src="assets/locandina.jpg" alt="Locandina di Come fecero i Greci">
+      <p class="sinossi"><b>Come fecero i Greci</b>, una commedia di Copia Incolla.<br>Spie italiane degli anni '40, tutte reincarnate, in una missione impossibile tra sedute spiritiche, travestimenti e gelati.</p>
+      <div class="quando" id="quando"></div>
+      <div class="dove" id="dove"></div>
+      <a id="btnPrenota" class="bottone prenota" target="_blank" rel="noopener">🎟️ Prenota il tuo posto</a>
+    </div>
+    <p class="sfida">Scopri chi erano i tuoi amici:</p>
+    <a id="btnWhatsapp" class="bottone whatsapp" target="_blank" rel="noopener">Sfida un amico su WhatsApp</a>
     <button id="btnRifai" class="link">Rifai il quiz</button>
   </div>
 </section>
+
+<!-- Invito a condividere quando si torna dal modulo di prenotazione -->
+<div id="toast" class="toast">
+  <button class="chiudi" id="chiudiToast" aria-label="Chiudi">×</button>
+  <p><b>Posto prenotato?</b> 🎉<br>Ora scopri chi erano i tuoi amici!</p>
+  <a id="btnWhatsapp2" class="bottone whatsapp" target="_blank" rel="noopener">Sfida un amico su WhatsApp</a>
+</div>
 
 <script>
 (() => {
   // ====== DATI: per una replica basta cambiare queste righe ======
   const SITO = "__SITO__";
   const PRENOTA = "https://forms.gle/PsdN4vKsmonuJ4nEA";
+  const QUANDO = "20 NOVEMBRE 2026 · ORE 21:00";
+  const DOVE = "TEATRO SANT'ANNA · VIA BRIONE 40, TORINO";
   // ===============================================================
   const DOMANDE = window.DOMANDE, RISULTATI = window.RISULTATI;
   const $ = id => document.getElementById(id);
@@ -162,11 +198,21 @@ pagina = r'''<!DOCTYPE html>
 
   // Arrivo dal link di un amico: ?r=numero
   const r = parseInt(new URLSearchParams(location.search).get("r"), 10);
-  if (r >= 1 && r <= RISULTATI.length) {
+  const amico = (r >= 1 && r <= RISULTATI.length) ? RISULTATI[r - 1] : null;
+  if (amico) {
     const a = $("amico"); a.style.display = "";
-    a.innerHTML = `Un tuo amico nella vita precedente era <b>${RISULTATI[r - 1]}</b>.<br>E tu?`;
+    a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>.<br>E tu?`;
   }
   $("btnPrenota").href = PRENOTA;
+  $("quando").textContent = QUANDO; $("dove").textContent = DOVE;
+  // Chi va a prenotare e poi torna sulla pagina riceve l'invito a sfidare gli amici
+  let haPrenotato = false;
+  $("btnPrenota").addEventListener("click", () => { haPrenotato = true; });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && haPrenotato) { haPrenotato = false; setTimeout(() => $("toast").classList.add("su"), 500); }
+  });
+  $("chiudiToast").addEventListener("click", () => $("toast").classList.remove("su"));
+  $("btnWhatsapp2").addEventListener("click", () => $("toast").classList.remove("su"));
 
   $("btnInizia").addEventListener("click", () => { suono.avvia(); suono.carta(); risposte = []; domanda(); });
   $("btnRifai").addEventListener("click", () => { suono.carta(); risposte = []; domanda(); });
@@ -201,8 +247,13 @@ pagina = r'''<!DOCTYPE html>
     $("risultato").textContent = testo.charAt(0).toUpperCase() + testo.slice(1);
     $("risultato").classList.remove("nascosto"); $("risultato").classList.add("appare");
     suono.rivela(); if (navigator.vibrate) navigator.vibrate([40, 60, 90]);
-    const messaggio = `Ho scoperto chi ero nella vita precedente: ${testo} 😂\nE tu chi eri? Scoprilo qui 👉 ${SITO}r/${n}.html`;
-    $("btnWhatsapp").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
+    const messaggio = `Ho scoperto chi ero nella vita precedente: ${testo} 😂\nTu chi eri? 👉 ${SITO}r/${n}.html\n(è il gioco di Come fecero i Greci, spettacolo teatrale)`;
+    $("btnWhatsapp").href = $("btnWhatsapp2").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
+    if (amico) {
+      $("confronto").style.display = "";
+      $("confronto").innerHTML = `Tu: <b>${testo}</b><br>Il tuo amico: <b>${amico}</b>`;
+    }
+    $("esito").scrollTop = 0;
     await attesa(900);
     $("azioni").classList.remove("nascosto");
   }

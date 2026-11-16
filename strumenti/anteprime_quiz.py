@@ -27,7 +27,8 @@ def a_capo(d, testo, f, larg):
 def anteprima(sopra, grande, sotto, out):
     im = FONDO.copy(); d = ImageDraw.Draw(im)
     im.paste(lg, (46, 30)); testo3D(d, "COME FECERO I GRECI", 160, 58, 46, centro=False)
-    d.text((W / 2 - d.textlength(sopra, font=SE(36)) / 2, 168), sopra, font=SE(36), fill=(244, 233, 208))
+    d.text((162, 112), "un gioco della commedia teatrale di Copia Incolla", font=SE(22), fill=(244, 233, 208))
+    d.text((W / 2 - d.textlength(sopra, font=SE(36)) / 2, 178), sopra, font=SE(36), fill=(244, 233, 208))
     px = 78
     while True:
         righe = a_capo(d, grande.upper(), LG(px), W - 140)
