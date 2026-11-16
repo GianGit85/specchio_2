@@ -99,7 +99,7 @@ pagina = r'''<!DOCTYPE html>
   .confronto b { color: #c22f26; }
   .scheda { width: min(100%, 380px); background: rgba(0,0,0,.35); border: 1px solid rgba(244,233,208,.2); border-radius: 14px; padding: 12px 12px 18px;
     display: flex; flex-direction: column; align-items: center; gap: 9px; }
-  .locandina { width: 100%; max-height: 30vh; object-fit: cover; object-position: center 18%; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.6); }
+  .locandina { width: 100%; margin-top: 8px; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.6); }
   .sinossi { font-size: .95rem; line-height: 1.5; max-width: 22em; }
   .quando { font-family: var(--titolo); color: var(--giallo); font-size: 1.15rem; text-shadow: 0 2px 0 #6b4a10; line-height: 1.2; }
   .dove { font-family: var(--titolo); color: var(--rosso); font-size: 1rem; text-shadow: 0 2px 0 #5a140e; }
@@ -153,11 +153,11 @@ pagina = r'''<!DOCTYPE html>
     <div id="confronto" class="confronto" style="display:none"></div>
     <p class="ponte">Non sei l'unico tornato da una vita precedente…</p>
     <div class="scheda">
-      <img class="locandina" src="assets/locandina.jpg" alt="Locandina di Come fecero i Greci">
-      <p class="sinossi"><b>Come fecero i Greci</b>, una commedia di Copia Incolla.<br>Spie italiane degli anni '40, tutte reincarnate, in una missione impossibile tra sedute spiritiche, travestimenti e gelati.</p>
       <div class="quando" id="quando"></div>
       <div class="dove" id="dove"></div>
       <a id="btnPrenota" class="bottone prenota" target="_blank" rel="noopener">🎟️ Prenota il tuo posto</a>
+      <img class="locandina" src="assets/locandina.jpg" alt="Locandina di Come fecero i Greci">
+      <p class="sinossi"><b>Come fecero i Greci</b>, una commedia di Copia Incolla.<br>Spie italiane degli anni '40, tutte reincarnate, in una missione impossibile tra sedute spiritiche, travestimenti e gelati.</p>
     </div>
     <p class="sfida">Scopri chi erano i tuoi amici:</p>
     <a id="btnWhatsapp" class="bottone whatsapp" target="_blank" rel="noopener">Sfida un amico su WhatsApp</a>
