@@ -167,6 +167,9 @@
   }
   .spazio { width: calc(var(--lw) * .35); }
   .sottotitolo { font-size: .9rem; letter-spacing: .12em; opacity: 0; animation: appari 1s forwards; }
+  .profezia { max-width: 22em; margin-top: 6px; padding: 10px 16px 12px; background: #f1e4c8; color: #2a1c10;
+    transform: rotate(-1.5deg); box-shadow: 4px 6px 0 rgba(0,0,0,.45); font-size: .95rem; line-height: 1.45; text-align: center; }
+  .profezia small { display: block; color: #c22f26; letter-spacing: .2em; font-size: .7rem; margin-bottom: 4px; }
   .motto { font-size: .95rem; font-style: italic; opacity: 0; animation: appari 1s .4s forwards; }
   .piccolo-sugg { font-size: .82rem; opacity: .6; }
 
@@ -197,6 +200,7 @@
 <div class="fumo"><i></i><i></i><i></i></div>
 <button id="btnAudio" class="audio" aria-label="Suoni">🔊</button>
 <div id="diag"></div>
+<script src="profezie.js"></script>
 <script>
   // Diagnosi: se qualcosa si rompe, l'errore compare in fondo allo schermo
   (() => { const mostra = m => { const d = document.getElementById("diag"); if (d) d.textContent = "⚠ " + m; };
@@ -210,7 +214,6 @@
   <div class="piccolo">UNA COMMEDIA TEATRALE DI</div>
   <img class="logo" src="assets/logo-copia-incolla.jpg" alt="Copia Incolla">
   <h1 class="titolo">COME FECERO<br>I GRECI</h1>
-  <div class="data">20 NOVEMBRE 2026 · ORE 21:00</div>
   <p class="medium"><span id="testoMedium"></span><span class="cursore">▌</span></p>
   <button id="btnEntra" class="bottone nascosto">Tocca per iniziare</button>
   <button id="btnInizia" class="bottone nascosto" style="display:none">Scoprilo 🔮</button>
@@ -263,8 +266,14 @@
 <script>
 (() => {
   const TITOLO = "COME FECERO I GRECI";
-  const QUANDO = "20 NOVEMBRE 2026 · ORE 21:00";
-  const DOVE = "TEATRO SANT'ANNA · TORINO";
+  const PROFEZIE = (window.PROFEZIE && window.PROFEZIE.length) ? window.PROFEZIE
+    : ["Gli spiriti vedono una risata nel tuo futuro. Molto vicino. Tipo tra dieci minuti."];
+  let ultimaProfezia = -1, profezia = "";
+  function nuovaProfezia() {
+    let i; do { i = Math.floor(Math.random() * PROFEZIE.length); } while (PROFEZIE.length > 1 && i === ultimaProfezia);
+    ultimaProfezia = i; return PROFEZIE[i];
+  }
+  const oggi = () => new Date().toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
   const INSTAGRAM = "@copia.in.colla";
   const MOTTO = "Senza pubblico non c'è spettacolo.";
   const TESTO_MEDIUM = "Il medium ha una domanda per te…\n\nSai qual è la cosa più importante di questo spettacolo?";
@@ -779,9 +788,12 @@
     await attesa(6 * 220 + 500);
     box.insertAdjacentHTML("beforeend", `<div class="sottotitolo">LA COSA PIÙ IMPORTANTE DI STASERA</div>
       <div class="motto">${MOTTO}</div>`);
-    if (sfera3D) setTimeout(() => $("btnMagia").classList.remove("nascosto"), 600);
+    if (sfera3D && !senzaCamera) setTimeout(() => $("btnMagia").classList.remove("nascosto"), 600);
 
     if (senzaCamera) {
+      await attesa(1200);
+      box.insertAdjacentHTML("beforeend", '<div class="profezia"><small>LA PROFEZIA DEL MEDIUM</small><span id="testoProfezia"></span></div>');
+      await scrivi($("testoProfezia"), nuovaProfezia(), 40);
       box.insertAdjacentHTML("beforeend", '<button id="btnRicarica" class="link" style="margin-top:4px">Riprova con la fotocamera</button>');
       $("btnRicarica").addEventListener("click", () => location.reload());
     } else {
@@ -819,6 +831,7 @@
     suono.scatto();
 
     await fontPronti;
+    profezia = nuovaProfezia();
     const tela = componiFoto();
     const blob = await new Promise(ok => tela.toBlob(ok, "image/jpeg", 0.9));
     fileFoto = new File([blob], "come-fecero-i-greci.jpg", { type: "image/jpeg" });
@@ -943,17 +956,42 @@
     c.font = 'italic 34px "Special Elite", monospace'; c.fillStyle = "#f4e9d0";
     c.fillText(MOTTO, W / 2, 1565);
 
-    // Info
-    c.textAlign = "center";
-    c.font = '54px "Luckiest Guy", sans-serif';
-    c.fillStyle = "#6b4a10"; c.fillText(QUANDO, W / 2, 1664);
-    c.fillStyle = "#f2c230"; c.fillText(QUANDO, W / 2, 1660);
-    c.font = '50px "Luckiest Guy", sans-serif';
-    c.fillStyle = "#5a140e"; c.fillText(DOVE, W / 2, 1734);
-    c.fillStyle = "#e04a3a"; c.fillText(DOVE, W / 2, 1730);
-    c.fillStyle = "#f4e9d0"; c.font = '40px "Special Elite", monospace';
-    c.fillText(INSTAGRAM, W / 2, 1830);
+    bigliettoProfezia(c, profezia || nuovaProfezia(), W / 2, 1600, 900);
+    c.textAlign = "center"; c.fillStyle = "#f4e9d0"; c.font = '34px "Special Elite", monospace';
+    c.fillText(`${oggi()}  ·  ${INSTAGRAM}`, W / 2, 1878);
     return t;
+  }
+
+  // Biglietto di carta strappata con la profezia (si adatta alla lunghezza del testo)
+  function bigliettoProfezia(c, testo, cx, y, w) {
+    let px = 33, righe;
+    const aCapo = () => {
+      c.font = `${px}px "Special Elite", monospace`;
+      righe = []; let riga = "";
+      for (const parola of testo.split(" ")) {
+        const prova = riga ? riga + " " + parola : parola;
+        if (c.measureText(prova).width > w - 90 && riga) { righe.push(riga); riga = parola; } else riga = prova;
+      }
+      righe.push(riga);
+    };
+    aCapo(); while (righe.length > 3 && px > 24) { px -= 2; aCapo(); }
+    const passo = px * 1.3, h = 62 + righe.length * passo + 22;
+    c.save(); c.translate(cx, y + h / 2); c.rotate(-1.5 * Math.PI / 180);
+    c.beginPath(); c.moveTo(-w / 2, -h / 2);
+    for (let x = -w / 2; x <= w / 2; x += 18) c.lineTo(x, -h / 2 + (Math.random() * 7 - 3.5));    // bordo strappato
+    c.lineTo(w / 2, h / 2);
+    for (let x = w / 2; x >= -w / 2; x -= 18) c.lineTo(x, h / 2 + (Math.random() * 7 - 3.5));
+    c.closePath();
+    c.shadowColor = "rgba(0,0,0,.55)"; c.shadowOffsetX = 6; c.shadowOffsetY = 9; c.shadowBlur = 8;
+    c.fillStyle = "#f1e4c8"; c.fill(); c.shadowColor = "transparent";
+    c.textAlign = "center"; c.textBaseline = "alphabetic";
+    c.font = '24px "Special Elite", monospace'; c.fillStyle = "#c22f26";
+    if ("letterSpacing" in c) c.letterSpacing = "4px";
+    c.fillText("LA PROFEZIA DEL MEDIUM", 0, -h / 2 + 44);
+    if ("letterSpacing" in c) c.letterSpacing = "0px";
+    c.font = `${px}px "Special Elite", monospace`; c.fillStyle = "#2a1c10";
+    righe.forEach((r, i) => c.fillText(r, 0, -h / 2 + 62 + (i + 1) * passo - px * .25));
+    c.restore();
   }
 
   function scarica() {
