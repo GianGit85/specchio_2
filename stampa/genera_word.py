@@ -55,8 +55,8 @@ def biglietto(W):
 card = biglietto(round(LARGHEZZA_CM / 2.54 * DPI))
 px = lambda cm: round(cm / 2.54 * DPI)
 w_cm = LARGHEZZA_CM; h_cm = w_cm * card.height / card.width
-MARGINE = .5                                            # margine pagina (la stampante non arriva al bordo)
-AREA_W, AREA_H = 21 - 2 * MARGINE, 29.6 - 2 * MARGINE  # 1 mm di riserva per non creare una seconda pagina
+MARGINE = .3                                            # margine pagina: le linee esterne restano a ~7 mm dal bordo del foglio
+AREA_W, AREA_H = 21 - 2 * MARGINE - .4, 29.6 - 2 * MARGINE  # 2 mm di riserva ai lati; 1 mm in basso per non creare una seconda pagina
 
 # Una sola immagine a tutta pagina: impaginazione identica in Word, LibreOffice e in stampa
 pag = Image.new("L", (px(AREA_W), px(AREA_H)), 255); d = ImageDraw.Draw(pag)
@@ -66,9 +66,9 @@ for r in range(RIGHE):
     for c in range(COLONNE): pag.paste(card.convert("L"), (x0 + c * cw, y0 + r * ch))
 # linee di taglio da bordo a bordo: si taglia sempre per tutta la larghezza/altezza del foglio
 for c in range(COLONNE + 1):
-    x = x0 + c * cw; d.line([x, 0, x, pag.height], fill=165, width=3)
+    x = x0 + c * cw; d.line([x, 0, x, pag.height], fill=110, width=7)
 for r in range(RIGHE + 1):
-    y = y0 + r * ch; d.line([0, y, pag.width, y], fill=165, width=3)
+    y = y0 + r * ch; d.line([0, y, pag.width, y], fill=110, width=7)
 png = os.path.join(TMP, "pagina.png"); pag.save(png, dpi=(DPI, DPI), optimize=True)
 
 doc = Document()
@@ -78,6 +78,8 @@ sez.left_margin = sez.right_margin = sez.top_margin = sez.bottom_margin = Cm(MAR
 sez.header_distance = sez.footer_distance = Cm(0)
 p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 pf = p.paragraph_format; pf.space_before = pf.space_after = Pt(0); pf.line_spacing = 1
-p.add_run().add_picture(png, width=Cm(AREA_W), height=Cm(AREA_H))
+foto = p.add_run().add_picture(png, width=Cm(AREA_W), height=Cm(AREA_H))
+for lato_ in ("distT", "distB", "distL", "distR"):        # nessun distacco attorno all'immagine (alcuni programmi ne aggiungono 3 mm)
+    foto._inline.set(lato_, "0")
 out = os.path.join(QUI, "biglietti.docx"); doc.save(out)
 print(f"{out}: {COLONNE * RIGHE} biglietti da {w_cm:.1f} x {h_cm:.2f} cm")
