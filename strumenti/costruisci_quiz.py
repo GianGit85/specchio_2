@@ -97,6 +97,9 @@ pagina = r'''<!DOCTYPE html>
   .ponte { font-family: var(--titolo); color: var(--giallo); font-size: clamp(1.15rem, 5.6vw, 1.5rem); line-height: 1.15; text-shadow: 0 2px 0 #6b4a10; max-width: 16em; margin: 10px 0 0; }
   .confronto { background: var(--carta); color: var(--inchiostro); padding: 10px 14px; max-width: 22em; transform: rotate(1deg); box-shadow: 4px 6px 0 rgba(0,0,0,.45); font-size: .9rem; line-height: 1.45; text-align: left; }
   .confronto b { color: #c22f26; }
+  .legame-intro { display: block; margin-top: 10px; font-size: .85rem; opacity: .85; }
+  .legame { display: block; margin-top: 4px; font-family: var(--titolo); font-size: 1.15rem; line-height: 1.2; color: #2a1c10; text-transform: uppercase; }
+  .confronto { text-align: center; }
   .scheda { width: min(100%, 380px); background: rgba(0,0,0,.35); border: 1px solid rgba(244,233,208,.2); border-radius: 14px; padding: 12px 12px 18px;
     display: flex; flex-direction: column; align-items: center; gap: 9px; }
   .locandina { width: 100%; margin-top: 8px; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.6); }
@@ -201,7 +204,7 @@ pagina = r'''<!DOCTYPE html>
   const amico = (r >= 1 && r <= RISULTATI.length) ? RISULTATI[r - 1] : null;
   if (amico) {
     const a = $("amico"); a.style.display = "";
-    a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>.<br>E tu?`;
+    a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>…<br>e gli spiriti hanno detto qualcosa anche su di te 🔒<br>Rispondi alle 5 domande per scoprirlo.`;
   }
   $("btnPrenota").href = PRENOTA;
   $("quando").textContent = QUANDO; $("dove").textContent = DOVE;
@@ -247,11 +250,13 @@ pagina = r'''<!DOCTYPE html>
     $("risultato").textContent = testo.charAt(0).toUpperCase() + testo.slice(1);
     $("risultato").classList.remove("nascosto"); $("risultato").classList.add("appare");
     suono.rivela(); if (navigator.vibrate) navigator.vibrate([40, 60, 90]);
-    const messaggio = `Ho scoperto chi ero nella vita precedente: ${testo} 😂\nTu chi eri? 👉 ${SITO}r/${n}.html\n(è il gioco di Come fecero i Greci, spettacolo teatrale)`;
+    const messaggio = `Ho scoperto chi ero nella vita precedente: ${testo} 😂\n…e gli spiriti hanno detto qualcosa anche su di te 👀 Scopri cosa 👉 ${SITO}r/${n}.html\n(è il gioco di Come fecero i Greci, spettacolo teatrale)`;
     $("btnWhatsapp").href = $("btnWhatsapp2").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
     if (amico) {
       $("confronto").style.display = "";
-      $("confronto").innerHTML = `Tu: <b>${testo}</b><br>Il tuo amico: <b>${amico}</b>`;
+      $("confronto").innerHTML = `Tu: <b>${testo}</b><br>Il tuo amico: <b>${amico}</b>
+        <span class="legame-intro">E gli spiriti dicono che nella vita precedente voi due eravate…</span>
+        <span class="legame">${window.calcolaLegame(n, r)}</span>`;
     }
     $("esito").scrollTop = 0;
     await attesa(900);
@@ -280,7 +285,7 @@ for n, t in enumerate(ris, 1):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{SITO}r/{n}.html">
 <meta property="og:title" content="{tit}">
-<meta property="og:description" content="E tu chi eri? Scoprilo in 30 secondi.">
+<meta property="og:description" content="…e gli spiriti hanno detto qualcosa anche su di te 👀">
 <meta property="og:image" content="{SITO}assets/r/{n}.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">

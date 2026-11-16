@@ -41,6 +41,6 @@ def anteprima(sopra, grande, sotto, out):
 os.makedirs(f"{R}/assets/r", exist_ok=True)
 ris = json.loads(subprocess.check_output(["node", "-e", f"global.window={{}};require('{R}/quiz.js');console.log(JSON.stringify(window.RISULTATI))"]))
 for n, t in enumerate(ris, 1):
-    anteprima("NELLA VITA PRECEDENTE ERO…", t, "E tu chi eri? Scoprilo in 30 secondi", f"{R}/assets/r/{n}.jpg")
+    anteprima("NELLA VITA PRECEDENTE ERO…", t, "…e gli spiriti hanno detto qualcosa anche su di te", f"{R}/assets/r/{n}.jpg")
 anteprima("IL MEDIUM HA UNA DOMANDA PER TE", "Chi eri nella vita precedente?", "5 domande, 30 secondi. Gli spiriti sanno tutto.", f"{R}/assets/anteprima.jpg")
 print("ok", len(ris))
