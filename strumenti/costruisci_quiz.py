@@ -9,11 +9,11 @@ pagina = r'''<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0b0705">
 <title>Chi eri nella vita precedente? 🔮</title>
-<meta name="description" content="5 domande, 30 secondi. Gli spiriti sanno tutto. Come fecero i Greci, una commedia di Copia Incolla.">
+<meta name="description" content="3 domande, 20 secondi. Gli spiriti sanno chi eri nella vita precedente. Un gioco di Come fecero i Greci, commedia di Copia Incolla.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="__SITO__">
 <meta property="og:title" content="Chi eri nella vita precedente? 🔮">
-<meta property="og:description" content="5 domande, 30 secondi. Gli spiriti sanno tutto.">
+<meta property="og:description" content="Gli spiriti sanno chi eri… e hanno qualcosa da dirti 👀 3 domande, 20 secondi.">
 <meta property="og:image" content="__SITO__assets/anteprima.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -129,8 +129,8 @@ pagina = r'''<!DOCTYPE html>
 <section id="inizio" class="schermata attiva">
   <div id="amico" class="amico" style="display:none"></div>
   <h1 class="titolo">CHI ERI NELLA<br>VITA PRECEDENTE?</h1>
-  <p class="sotto">5 domande. Gli spiriti sanno tutto.</p>
-  <button id="btnInizia" class="bottone">Scoprilo in 30 secondi 🔮</button>
+  <p class="sotto">3 domande. Gli spiriti sanno tutto.</p>
+  <button id="btnInizia" class="bottone">Scoprilo in 20 secondi 🔮</button>
   <div class="firma"><img src="assets/logo-copia-incolla.jpg" alt=""><span>Un gioco di <b>Come fecero i Greci</b><br>commedia teatrale di Copia Incolla</span></div>
 </section>
 
@@ -162,8 +162,8 @@ pagina = r'''<!DOCTYPE html>
       <img class="locandina" src="assets/locandina.jpg" alt="Locandina di Come fecero i Greci">
       <p class="sinossi"><b>Come fecero i Greci</b>, una commedia di Copia Incolla.<br>Spie italiane degli anni '40, tutte reincarnate, in una missione impossibile tra sedute spiritiche, travestimenti e gelati.</p>
     </div>
-    <p class="sfida">Scopri chi erano i tuoi amici:</p>
-    <a id="btnWhatsapp" class="bottone whatsapp" target="_blank" rel="noopener">Sfida un amico su WhatsApp</a>
+    <p class="sfida">Scopri cosa dicono gli spiriti dei tuoi amici:</p>
+    <a id="btnWhatsapp" class="bottone whatsapp" target="_blank" rel="noopener">Invialo su WhatsApp</a>
     <button id="btnRifai" class="link">Rifai il quiz</button>
   </div>
 </section>
@@ -171,8 +171,8 @@ pagina = r'''<!DOCTYPE html>
 <!-- Invito a condividere quando si torna dal modulo di prenotazione -->
 <div id="toast" class="toast">
   <button class="chiudi" id="chiudiToast" aria-label="Chiudi">×</button>
-  <p><b>Posto prenotato?</b> 🎉<br>Ora scopri chi erano i tuoi amici!</p>
-  <a id="btnWhatsapp2" class="bottone whatsapp" target="_blank" rel="noopener">Sfida un amico su WhatsApp</a>
+  <p><b>Posto prenotato?</b> 🎉<br>Ora scopri cosa dicono gli spiriti dei tuoi amici!</p>
+  <a id="btnWhatsapp2" class="bottone whatsapp" target="_blank" rel="noopener">Invialo su WhatsApp</a>
 </div>
 
 <script>
@@ -203,8 +203,9 @@ pagina = r'''<!DOCTYPE html>
   const r = parseInt(new URLSearchParams(location.search).get("r"), 10);
   const amico = (r >= 1 && r <= RISULTATI.length) ? RISULTATI[r - 1] : null;
   if (amico) {
+    try { history.replaceState(null, "", `r/${r}.html`); } catch (_) {}
     const a = $("amico"); a.style.display = "";
-    a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>…<br>e gli spiriti hanno detto qualcosa anche su di te 🔒<br>Rispondi alle 5 domande per scoprirlo.`;
+    a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>…<br>e gli spiriti hanno detto qualcosa anche su di te 🔒<br>Rispondi alle 3 domande per scoprirlo.`;
   }
   $("btnPrenota").href = PRENOTA;
   $("quando").textContent = QUANDO; $("dove").textContent = DOVE;
