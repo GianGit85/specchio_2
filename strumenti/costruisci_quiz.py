@@ -57,6 +57,7 @@ pagina = r'''<!DOCTYPE html>
   .bottone.whatsapp { background: #25d366; color: #fff; box-shadow: 0 5px 0 #128c4a, 0 9px 18px rgba(0,0,0,.6); text-shadow: 0 1px 2px rgba(0,0,0,.25); }
   .bottone.whatsapp:active { box-shadow: 0 1px 0 #128c4a, 0 4px 10px rgba(0,0,0,.6); }
   .bottone.prenota { background: var(--rosso); color: #fff; box-shadow: 0 5px 0 #7a1d14, 0 9px 18px rgba(0,0,0,.6); }
+  .bottone.instagram { background: linear-gradient(45deg, #f9a43c, #e1306c 50%, #833ab4); box-shadow: 0 5px 0 #5b1f74, 0 9px 18px rgba(0,0,0,.6); }
   .bottone.prenota:active { box-shadow: 0 1px 0 #7a1d14, 0 4px 10px rgba(0,0,0,.6); }
   .link { background: none; border: none; color: #bbb; font-family: var(--macchina); font-size: .9rem; text-decoration: underline; cursor: pointer; padding: 8px; }
   .nascosto { opacity: 0 !important; pointer-events: none !important; }
@@ -154,7 +155,7 @@ pagina = r'''<!DOCTYPE html>
   <h3 class="risultato nascosto" id="risultato"></h3>
   <div class="azioni nascosto" id="azioni">
     <div id="confronto" class="confronto" style="display:none"></div>
-    <p class="ponte">Non sei l'unico tornato da una vita precedente…</p>
+    <p class="ponte" id="ponte">Non sei l'unico tornato da una vita precedente…</p>
     <div class="scheda">
       <div class="quando" id="quando"></div>
       <div class="dove" id="dove"></div>
@@ -171,7 +172,7 @@ pagina = r'''<!DOCTYPE html>
 <!-- Invito a condividere quando si torna dal modulo di prenotazione -->
 <div id="toast" class="toast">
   <button class="chiudi" id="chiudiToast" aria-label="Chiudi">×</button>
-  <p><b>Posto prenotato?</b> 🎉<br>Ora scopri cosa dicono gli spiriti dei tuoi amici!</p>
+  <p id="testoToast"><b>Posto prenotato?</b> 🎉<br>Ora scopri cosa dicono gli spiriti dei tuoi amici!</p>
   <a id="btnWhatsapp2" class="bottone whatsapp" target="_blank" rel="noopener">Invialo su WhatsApp</a>
 </div>
 
@@ -182,6 +183,7 @@ pagina = r'''<!DOCTYPE html>
   const PRENOTA = "https://forms.gle/PsdN4vKsmonuJ4nEA";
   const QUANDO = "20 NOVEMBRE 2026 · ORE 21:00";
   const DOVE = "TEATRO SANT'ANNA · VIA BRIONE 40, TORINO";
+  const INSTAGRAM_URL = "https://www.instagram.com/copia.in.colla/";
   // ===============================================================
   const DOMANDE = window.DOMANDE, RISULTATI = window.RISULTATI;
   const $ = id => document.getElementById(id);
@@ -208,6 +210,18 @@ pagina = r'''<!DOCTYPE html>
     a.innerHTML = `Un tuo amico nella vita precedente era <b>${amico}</b>…<br>e gli spiriti hanno detto qualcosa anche su di te 🔒<br>Rispondi alle 3 domande per scoprirlo.`;
   }
   $("btnPrenota").href = PRENOTA;
+  // Modalità "sala" (QR esposto in teatro, ?sala=1): niente prenotazione, invito a seguire su Instagram
+  if (new URLSearchParams(location.search).has("sala")) {
+    $("ponte").textContent = "E stasera sei proprio nel posto giusto…";
+    $("btnPrenota").href = INSTAGRAM_URL;
+    $("btnPrenota").textContent = "📸 Segui @copia.in.colla";
+    $("btnPrenota").classList.add("instagram");
+    $("testoToast").innerHTML = "<b>Grazie!</b> 🎉<br>Ora scopri cosa dicono gli spiriti dei tuoi amici!";
+    setTimeout(() => {
+      $("quando").textContent = "Grazie di essere qui stasera! 🎭";
+      $("dove").textContent = "Seguici per scoprire le prossime repliche";
+    });
+  }
   $("quando").textContent = QUANDO; $("dove").textContent = DOVE;
   // Chi va a prenotare e poi torna sulla pagina riceve l'invito a sfidare gli amici
   let haPrenotato = false;
