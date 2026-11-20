@@ -211,12 +211,14 @@ pagina = r'''<!DOCTYPE html>
   }
   $("btnPrenota").href = PRENOTA;
   // Modalità "sala" (QR esposto in teatro, ?sala=1): niente prenotazione, invito a seguire su Instagram
-  if (new URLSearchParams(location.search).has("sala")) {
+  const inSala = new URLSearchParams(location.search).has("sala");
+  if (inSala) {
+    // in sala tutto semplicissimo: niente WhatsApp, niente confronto, niente invito dopo il clic
+    document.querySelectorAll("#btnWhatsapp, .sfida, #toast, #confronto, #amico").forEach(e => e.remove());
     $("ponte").textContent = "E stasera sei proprio nel posto giusto…";
     $("btnPrenota").href = INSTAGRAM_URL;
     $("btnPrenota").textContent = "📸 Segui @copia.in.colla";
     $("btnPrenota").classList.add("instagram");
-    $("testoToast").innerHTML = "<b>Grazie!</b> 🎉<br>Ora scopri cosa dicono gli spiriti dei tuoi amici!";
     setTimeout(() => {
       $("quando").textContent = "Grazie di essere qui stasera! 🎭";
       $("dove").textContent = "Seguici per scoprire le prossime repliche";
@@ -227,10 +229,12 @@ pagina = r'''<!DOCTYPE html>
   let haPrenotato = false;
   $("btnPrenota").addEventListener("click", () => { haPrenotato = true; });
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && haPrenotato) { haPrenotato = false; setTimeout(() => $("toast").classList.add("su"), 500); }
+    if (document.visibilityState === "visible" && haPrenotato && $("toast")) { haPrenotato = false; setTimeout(() => $("toast").classList.add("su"), 500); }
   });
-  $("chiudiToast").addEventListener("click", () => $("toast").classList.remove("su"));
-  $("btnWhatsapp2").addEventListener("click", () => $("toast").classList.remove("su"));
+  if ($("toast")) {
+    $("chiudiToast").addEventListener("click", () => $("toast").classList.remove("su"));
+    $("btnWhatsapp2").addEventListener("click", () => $("toast").classList.remove("su"));
+  }
 
   $("btnInizia").addEventListener("click", () => { suono.avvia(); suono.carta(); risposte = []; domanda(); });
   $("btnRifai").addEventListener("click", () => { suono.carta(); risposte = []; domanda(); });
@@ -273,8 +277,8 @@ pagina = r'''<!DOCTYPE html>
       `Ok, secondo questo gioco nella vita precedente ero ${testo} 🤣 Dice qualcosa anche su di te, voglio troppo sapere cosa ti esce!`
     ];
     const messaggio = `${apertura[Math.floor(Math.random() * apertura.length)]}\n\nÈ il gioco di uno spettacolo teatrale, "Come fecero i Greci" 🎭\n${SITO}r/${n}.html`;
-    $("btnWhatsapp").href = $("btnWhatsapp2").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
-    if (amico) {
+    if ($("btnWhatsapp")) $("btnWhatsapp").href = $("btnWhatsapp2").href = "https://wa.me/?text=" + encodeURIComponent(messaggio);
+    if (amico && $("confronto")) {
       $("confronto").style.display = "";
       $("confronto").innerHTML = `Tu: <b>${testo}</b><br>Il tuo amico: <b>${amico}</b>
         <span class="legame-intro">E gli spiriti dicono che nella vita precedente voi due eravate…</span>
