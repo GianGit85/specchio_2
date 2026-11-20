@@ -220,7 +220,7 @@ pagina = r'''<!DOCTYPE html>
     $("btnPrenota").textContent = "📸 Segui @copia.in.colla";
     $("btnPrenota").classList.add("instagram");
     setTimeout(() => {
-      $("quando").textContent = "Grazie di essere qui stasera! 🎭";
+      $("quando").textContent = "Grazie di essere qui! 🎭";
       $("dove").textContent = "Seguici per scoprire le prossime repliche";
     });
   }
